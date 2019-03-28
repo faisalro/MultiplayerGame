@@ -1,11 +1,17 @@
 --- load with 
 --- sqlite3 database.db < schema.sql
-
-drop table Users;
-
-CREATE TABLE Users (
-	Username VARCHAR(20) PRIMARY KEY,
-	Email VARCHAR(20) NOT NULL,
-	Password VARCHAR(20) NOT NULL,
-	Score INT DEFAULT 0
+CREATE TABLE user (
+	user VARCHAR(20) PRIMARY KEY,
+	password VARCHAR(20) NOT NULL,
+	skill VARCHAR(20),
+	year integer,
+	month VARCHAR(3),
+	day integer,
+	playmorning BOOLEAN default 'f',
+	playafternoon BOOLEAN default 'f',
+	playevening BOOLEAN default 'f'
+);
+CREATE TABLE score (
+	username VARCHAR(20) REFERENCES user(username) ON UPDATE CASCADE ON DELETE CASCADE,
+	score INTEGER DEFAULT 0
 );

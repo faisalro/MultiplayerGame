@@ -1,288 +1,152 @@
 function randint(n){ return Math.round(Math.random()*n); }
 function rand(n){ return Math.random()*n; }
-const scale = 2;
-var tx = 0;
-var ty = 0;
-const weaponNum = 30;
-const ammoNum = 10;
-const numBuildings = 5;
 
 class Stage {
-	constructor(canvas, player_canvas, obstacle_canvas, top_canvas){
-		// game dimensions
-		this.canvas_size = 800;
-
-
-		// canvases
+	constructor(canvas){
 		this.canvas = canvas;
-		this.player_canvas = player_canvas;
-
-		this.obstacle_canvas = obstacle_canvas;
-		this.top_canvas = top_canvas;
-
-		// keeping track of where the player is in the whole world
-		this.playerx = Math.floor(this.player_canvas.width/2);
-		this.playery =Math.floor(this.player_canvas.height/2);
-		
-		this.player=null;		// a special actor, the player
-
-		this.actors=[];			// all ai bot enemies
-		this.ammo=[]; 			// all ammo objects on the field
-		this.weapons=[]; 		// all weapon objects on the field
-		this.healthPoints=[];	// all health objects on the field
-
-		var devicePixelRatio = window.devicePixelRatio;
-		this.full_canvas = this.canvas_size * scale;
-
-		// the end of the world
-		this.maxx = this.canvas_size * devicePixelRatio * 1.2;
-		this.maxy = this.canvas_size * devicePixelRatio * 1.2;
-
-		// canvas widths for all different coordinate systems
-		this.canvas.width = this.canvas_size / scale;
-		this.canvas.height = this.canvas_size / scale;
-
-		this.obstacle_canvas.width = this.canvas_size / scale;
-		this.obstacle_canvas.height = this.canvas_size / scale;
-
-		this.player_canvas.width = this.canvas_size;
-		this.player_canvas.height = this.canvas_size;
-
-		this.top_canvas.width = this.canvas_size / scale;
-		this.top_canvas.height = this.canvas_size / scale;
+	
+		this.actors=[]; // all actors on this stage (monsters, player, boxes, ...)
+		this.player=null; // a special actor, the player
 	
 		// the logical width and height of the stage
+		/**
 		this.width=canvas.width;
 		this.height=canvas.height;
+		**/
+		this.width=10000;
+		this.height=10000;
 
-		// the terrain and map objects
-		this.draw_map = null;
-		this.river = null;
-		this.riverbed = null;
-		this.riverbed2 = null;
-		this.obstacles = [];
-		this.roofs = [];
-		this.drawRoof = []; // array of booleans telling us if we need to draw that roof
-		for(var i = 0; i < numBuildings; i ++){
-			this.drawRoof.push(1);
-			// 1 means that the player is not in the bulding
+		this.canvasWidth=canvas.width;
+		this.canvasHeight=canvas.height;
+
+		// The player
+		let s = this.randomState();
+		var b = new Tank(this, s.position, s.velocity, s.colour, s.radius);
+		this.addPlayer(b);
+
+		let numBalls=100, numBoxes=numBalls*10, numOpponents=numBalls;
+		// Some balls
+		for(let i=0;i<numBalls;i++){
+			let s = this.randomState();
+			var b = new Ball(this, s.position, s.velocity, s.colour, s.radius);
+			this.addActor(b);
 		}
 
-		// Add the player to the center of the stage
-
-		this.addPlayer(new Player(this, new Pair(Math.floor(this.player_canvas.width/2),Math.floor(this.player_canvas.height/2))));
-		
-		// Randomly adding all bots accross the game
-		var i = 0;
-		for(i = 0; i < Math.floor(botNum/3); i ++){
-			this.addActor(new AI_Bot(this, this.randomPosition(0, 0, 0, 0), "A"));
-			this.addActor(new AI_Bot(this, this.randomPosition(0, 0, 0, 0), "B"));
-			this.addActor(new AI_Bot(this, this.randomPosition(0, 0, 0, 0), "C"));
-		}
-		while(i > botNum){
-			this.addActor(new AI_Bot(this, this.randomPosition(0, 0, 0, 0), "A"));
-		}
-		for(i = 0; i < weaponNum; i ++){
-			this.addHealth(new Health(this.randomPosition(0, 0, 0, 0)));
-			this.addAmmo(new Ammo(this.randomPosition(0, 0, 0, 0), "Rifle"));
-			this.addWeapon(new Weapon("Rifle", 0, 40, 11, 30, 30, this.randomPosition(0, 0, 0, 0), 200));
-
+		// Lots of boxes
+		for(let i=0;i<numBoxes;i++){
+			let s = this.randomState();
+			var b = new Box(this, s.position, s.colour,40);
+			this.addActor(b);
 		}
 
+		// Some opponents
+		for(let i=0;i<numOpponents;i++){
+			let s = this.randomState();
+			var b = new Opponent(this, s.position, s.velocity, s.colour, s.radius);
+			this.addActor(b);
+		}
 	}
-	move(player, x, y){
-		player.move(player, x, y);
-
-	}
-
-	/*
-		picks a random position on the game canvas
-	*/
-	randomPosition(minx, maxx, miny, maxy){
-		var x = this.full_canvas - maxx;
-		var y = this.full_canvas - maxy;
-		var randomX=Math.floor(Math.random() * (+x - +minx)) + + minx;
-		var randomY=Math.floor(Math.random() * (+y - +miny)) + + miny;
-		return new Pair(randomX, randomY);
-	}
-
-	/*
-		Calculates correct clearing dimensions so that
-		only the necessary parts of the world canvas is cleared
-
-	*/
-	clear(context){
-
-		var x1 = this.playerx - (this.canvas_size/2) - 200;
-		var y1 = this.playery - (this.canvas_size/2) - 200;
-
-		var x2 = this.playerx + (this.canvas_size/2) + 200;		
-		var y2 = this.playery + (this.canvas_size/2) + 200;
-
-		if(x1 < this.canvas_size/2){
-			x1 = 0;
-			x2 = this.canvas_size;
-		}else if(x2 > this.maxx){
-			x2 = this.maxx;
-			x1 = this.maxx - this.canvas_size;
+	randomState(){
+		var red=randint(255), green=randint(255), blue=randint(255), alpha = Math.random();
+		var x=Math.floor((Math.random()*this.width)),
+			y=Math.floor((Math.random()*this.height));
+	
+		return {
+			radius : randint(20),
+			colour: 'rgba('+red+','+green+','+blue+','+alpha+')',
+			position : new Pair(x,y),
+			velocity : new Pair(rand(20), rand(20)),
 		}
+	}
+	
+	// Map an canvas coordinates to world coordinates
+	mapCanvasToWorld(canvasPosition){
+		var halfCanvas = (new Pair(this.canvasWidth/2, this.canvasHeight/2)).toInt();
+		var playerPosition = this.player.position.toInt();
 
-		if(y1 < this.canvas_size/2){
-			y1 = 0;
-			y2 = this.canvas_size;
-		}else if(y2 > this.maxy){
-			y2 = this.maxy;
-			y1 = this.maxy - this.canvas_size;
-		}
-
-		context.clearRect(x1, y1, x2, y2);
-
+		var worldPosition = canvasPosition.vecAdd(playerPosition.vecSub(halfCanvas));
+		return worldPosition;
+	}
+	/** Handle the mouse movement on the stage in canvas coordinates **/
+	mouseMove(x,y){
+		var canvasPosition=new Pair(x,y);
+		var worldPosition=this.mapCanvasToWorld(canvasPosition);
+		this.player.pointTurret(worldPosition);
+	}
+	/** Handle the mouse click on the stage in canvas coordinates **/
+	mouseClick(x,y){
+		var canvasPosition=new Pair(x,y);
+		var worldPosition=this.mapCanvasToWorld(canvasPosition);
+		this.player.setFire(true);
 	}
 
 	addPlayer(player){
+		this.addActor(player);
 		this.player=player;
+	}
+
+	removePlayer(){
+		this.removeActor(this.player);
+		this.player=null;
 	}
 
 	addActor(actor){
 		this.actors.push(actor);
 	}
-	addAmmo(ammo){
-		this.ammo.push(ammo);
-	}
-	addWeapon(weapon){
-		this.weapons.push(weapon);
-	}
-	addHealth(health){
-		this.healthPoints.push(health);
-	}
 
-	removeActor(index){
+	removeActor(actor){
+		var index=this.actors.indexOf(actor);
 		if(index!=-1){
 			this.actors.splice(index,1);
 		}
 	}
+	
+	animate(){
+		this.step();
+		this.draw();
+		// Remove zombies
+		this.actors = this.actors.filter(actor => !actor.isZombie);
+	}
 
-	/*
-		all bots take a step
-	*/
+	// Take one step in the animation of the game.  
+	// Do this by asking each of the actors to take a single step. 
 	step(){
-		var context = this.canvas.getContext('2d');
 		for(var i=0;i<this.actors.length;i++){
-			var x = 1;
-			var y = 1;
-			// if we want the bots to be affected by ther river
-			var currentBot = context.isPointInPath(this.draw_map.river, this.actors[i].position.x*scale, this.actors[i].position.y*scale, "nonzero");
-
-			this.actors[i].step(x,y);
-			this.actors[i].spottedEnemy(this.player);
+			this.actors[i].step();
+			// console.log(this.actors[i].constructor.name);
 		}
 	}
-	
-	/*
-		Drawing the stage and all elements on it
-	*/
+
 	draw(){
-
 		var context = this.canvas.getContext('2d');
-		var player_context = this.player_canvas.getContext('2d');
-		var obstacle_context = this.obstacle_canvas.getContext('2d');
-		var top_context = this.top_canvas.getContext('2d');
 
-		// clearing the canvases before redrawing
-		this.clear(context);
-		//this.clear(obstacle_context);
-		obstacle_context.clearRect(0, 0, this.maxx, this.maxy);
-		player_context.clearRect(0, 0, this.player_canvas.width, this.player_canvas.height);
-		top_context.clearRect(0, 0, this.top_canvas.width, this.top_canvas.height);
-		
-		context.imageSmoothingQuality = 'high';
-		var devicePixelRatio = window.devicePixelRatio;
+		let playerPosition = this.player.position.toInt();
+		let x=playerPosition.x;
+		let y=playerPosition.y;
+		// console.log("x="+x+" y="+y);
 
-		// canvases strecthed according to scale
-		this.canvas.style.width = (this.canvas.width *scale).toString() + "px";
-		this.canvas.style.height = (this.canvas.height *scale).toString() + "px";
-		
-		this.top_canvas.style.width = (this.canvas.width *scale).toString() + "px";
-		this.top_canvas.style.height = (this.canvas.height *scale).toString() + "px";
+		let xt=-x+this.canvasWidth/2;
+		// if(x<this.canvasWidth/2)xt=0;
+		// if(x>this.width-this.canvasWidth/2)xt=-this.width+this.canvasWidth;
 
-		this.obstacle_canvas.style.width = (this.obstacle_canvas.width *scale).toString() + "px";
-		this.obstacle_canvas.style.height = (this.obstacle_canvas.height *scale).toString() + "px";
+		let yt=-y+this.canvasHeight/2;
+		// if(y<this.canvasHeight/2)yt=0;
+		// if(y>this.height-this.canvasHeight/2)yt=-this.height+this.canvasHeight;
 
-		// background map drawn, including terrain, river and obstacles
-		this.draw_map = new DrawMap(context, obstacle_context, this.maxx, this.maxy);
-		this.obstacles = this.draw_map.obstacles;
-		this.roofs = this.draw_map.roofs;
+		context.resetTransform();
 
-		// drawing the weapona and health objects
-		// condensed into one for loop to reduce complexity
-		for(var i=0;i<weaponNum;i++){
-			if(i < this.weapons.length){
-				this.weapons[i].draw(context);
-			}
-			if(i < this.healthPoints.length){
-				this.healthPoints[i].draw(context);
-			}	
-			if(i < this.ammo.length){
-				this.ammo[i].draw(context);
-			}
+		context.fillStyle = '#6f6';
+		context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-		}
+		context.translate(xt,yt);
+		context.fillRect(0, 0, this.width, this.height);
 
-        // drawing player and actors
-        this.player.draw(player_context);
-        this.player.animate();
-
-        for(var i=0;i<this.actors.length;i++){
+		for(var i=0;i<this.actors.length;i++){
 			this.actors[i].draw(context);
-			this.actors[i].animate();
-			this.actors[i].keepAim();
 		}
-
-		// updating the gun movement of the player according to the mouse
-		if(this.player.weapons.range > 0){
-			this.player.keepAim();
-		}
-		for(var i=0; i<numBuildings;i++){
-			if((i == 0) &&(this.drawRoof[i]== 1)){
-				this.draw_map.drawRoof(context, -150, 0, 1);
-			}else if((i == 0) &&(this.drawRoof[i]== 0)){
-				this.draw_map.drawRoof(context, -150, 0, 0);
-
-			}
-			else if((i == 1) &&(this.drawRoof[i]== 1)){
-				this.draw_map.drawRoof(context, 200, 900, 1);
-			}else if((i == 1) &&(this.drawRoof[i]== 0)){
-				this.draw_map.drawRoof(context, 200, 900, 0);
-
-			}
-			else if((i == 2) &&(this.drawRoof[i]== 1)){
-				this.draw_map.drawRoof(context, 350, 1200, 1);
-			}else if((i == 2) &&(this.drawRoof[i]== 0)){
-				this.draw_map.drawRoof(context, 350, 1200, 0);
-
-			}
-			else if((i == 3) &&(this.drawRoof[i]== 1)){
-				this.draw_map.drawRoof(context, -500, 1100, 1);
-			}else if((i == 3) &&(this.drawRoof[i]== 0)){
-				this.draw_map.drawRoof(context, -500, 1100, 0);
-
-			}
-			else if((i == 4) &&(this.drawRoof[i]== 1)){
-				this.draw_map.drawRoof(context, 450, 400, 1);
-			}else if((i == 4) &&(this.drawRoof[i]== 0)){
-				this.draw_map.drawRoof(context, 450, 400, 0);
-
-			}
-
-		}
-		
-		
-
 	}
-	
-	/*
-		return the first actor at coordinates (x,y) return null if there is no such actor
-	*/
+
+	// return the first actor at coordinates (x,y) return null if there is no such actor
 	getActor(x, y){
 		for(var i=0;i<this.actors.length;i++){
 			if(this.actors[i].x==x && this.actors[i].y==y){
@@ -291,6 +155,257 @@ class Stage {
 		}
 		return null;
 	}
-
 } // End Class Stage
+
+class Pair {
+	constructor(x,y){ this.x=x; this.y=y; }
+	toString(){ return "("+this.x+","+this.y+")"; }
+	norm2(){ return Math.sqrt(this.x*this.x+this.y*this.y); }
+	normalize(){ return this.sProd(1.0/this.norm2()); }
+	toInt(){ return new Pair(Math.round(this.x), Math.round(this.y)); }
+	clone(){ return new Pair(this.x, this.y); }
+	sProd(z){ return new Pair(this.x*z, this.y*z); }
+	dotProd(other){ return new Pair(this.x*other.x, this.y*other.y); }
+	vecAdd(other){ return new Pair(this.x+other.x, this.y+other.y); }
+	vecSub(other){ return new Pair(this.x-other.x, this.y-other.y); }
+}
+class Actor {
+	constructor(stage, position, velocity, colour, radius){
+		this.stage = stage;
+
+		// Below is the state of this
+		this.position=position;
+		this.velocity=velocity;
+		this.colour = colour;
+		this.radius = radius;
+		this.isZombie = false;
+		this.health = 10;
+
+		this.stateVars = [ "position" , "velocity", "colour", "radius", "isZombie", "health" ]; // should be static
+		this.savedState = {};
+	}
+	saveState(){
+		this.savedState={};
+		for(var s in this.stateVars){
+			this.savedState[this.stateVars[s]]= this[this.stateVars[s]];
+		}
+	}
+	makeZombie(){ this.isZombie = true; }
+
+	collide(other){ 
+		// Stop us moving when we collide with someone else
+		this.position = this.savedState.position;
+		this.velocity = new Pair(0,0);
+	}
+
+	// Return a list of actors close this
+	getCloseActors(delta){
+		var closeActors = [];
+ 		for(var i in this.stage.actors){
+			var other = this.stage.actors[i];
+			if(other==this)continue;
+			var distanceBetween = this.position.vecSub(other.position).norm2();
+			if(distanceBetween<=(this.radius+other.radius+delta)){
+				closeActors.push(other);
+			}
+                }
+		return closeActors;
+	}
+
+	step(){
+		// Save our previous state, just in case
+		this.saveState(); 
+		this.position=this.position.vecAdd(this.velocity);
+
+		var collidingActors = this.getCloseActors(0);
+		for(var i in collidingActors)this.collide(collidingActors[i]);
+			
+		// bounce off the walls
+		if(this.position.x<0){
+			this.position.x=0;
+			this.velocity.x=Math.abs(this.velocity.x);
+		}
+		if(this.position.x>this.stage.width){
+			this.position.x=this.stage.width;
+			this.velocity.x=-Math.abs(this.velocity.x);
+		}
+		if(this.position.y<0){
+			this.position.y=0;
+			this.velocity.y=Math.abs(this.velocity.y);
+		}
+		if(this.position.y>this.stage.height){
+			this.position.y=this.stage.height;
+			this.velocity.y=-Math.abs(this.velocity.y);
+		}
+	}
+	draw(context){
+		context.fillStyle = this.colour;
+   		// context.fillRect(this.x, this.y, this.radius,this.radius);
+		context.beginPath(); 
+		var intPosition = this.position.toInt();
+		context.arc(intPosition.x, intPosition.y, this.radius, 0, 2 * Math.PI, false); 
+		context.fill();   
+	}
+}
+
+class Ball extends Actor {
+	constructor(stage, position, velocity, colour, radius){
+		super(stage, position, velocity, colour, radius);
+	}
+	
+	headTo(position){
+		this.velocity = position.vecSub(this.position).normalize();
+	}
+
+	toString(){
+		return this.position.toString() + " " + this.velocity.toString();
+	}
+}
+
+class Box extends Actor {
+	constructor(stage, position, colour, radius){
+		var velocity = new Pair(0,0);
+		super(stage, position, velocity, colour, radius);
+	}
+	draw(context){
+		var intPosition = this.position.toInt();
+		var x=intPosition.x-this.radius;
+		var y=intPosition.y-this.radius; 
+		var width = this.radius*2; 
+		context.fillStyle = this.colour;
+		context.fillRect(x,y,width,width); 
+		context.strokeStyle="x000";
+		context.strokeRect(x,y,width,width);
+	}
+	step(){ return; }
+}
+
+class Tank extends Actor {
+	constructor(stage, position, velocity, colour, radius){
+		super(stage, position, velocity, colour, 10);
+
+		this.stateVars.concat["fire", "amunition", "pickup"];
+
+		this.turretDirection = new Pair(1,0);
+		this.fire = false; // whether we have to fire a bullet in the next step
+		this.pickup = false;
+		this.ammunition = 0;
+	}
+
+	// Point the turret at crosshairs in world coordinates
+	pointTurret(crosshairs){
+		var delta = crosshairs.toInt().vecSub(this.position.toInt());
+		if(delta.x!=0 || delta.y !=0){
+			this.turretDirection = delta.normalize();
+		}
+	}
+	getTurretPosition(){
+		// position = ((x,y)+turretDirection*this.radius).toInt()
+		return this.position.vecAdd(this.turretDirection.sProd(this.radius));
+	}
+	step(){
+		if(this.fire && this.amunition>0){
+			this.amunition--;
+
+			var bulletVelocity = this.turretDirection.sProd(5).vecAdd(this.velocity);
+			var bulletPosition = this.position.vecAdd(this.turretDirection.sProd(this.radius*2));;
+			var bullet = new Bullet(this.stage, bulletPosition, bulletVelocity, "#000000", this.radius/5);
+			this.stage.addActor(bullet);
+		}
+		this.setFire(false);
+
+		if(this.pickup){
+			var closeActors = this.getCloseActors(5); // we may not be touching, but pick them up just the same
+			var closeActor = closeActors.find(actor => actor.constructor.name=="Box");
+			if(closeActor){
+				this.amunition=30;
+				this.health = 10;
+			}
+		}
+		this.setPickup(false);
+
+		super.step();
+		this.velocity=this.velocity.sProd(.95);
+	}
+	setDirection(dx,dy){
+		var newDirection = new Pair(dx,dy);
+		var newVelocity = this.velocity.vecAdd(newDirection);
+		var m = newVelocity.norm2();
+		if(m>5)newVelocity=newVelocity.normalize().sProd(5);
+		this.velocity = newVelocity;
+	}
+	draw(context){
+		context.fillStyle = this.colour;
+		context.beginPath(); 
+		var intPosition = this.position.toInt();
+		context.arc(intPosition.x, intPosition.y, this.radius, 0, 2 * Math.PI, false); 
+		context.fill();   
+
+		var turretPos = this.getTurretPosition().toInt();
+		// console.log(turretPos);
+		context.beginPath(); 
+		context.arc(turretPos.x, turretPos.y, this.radius/2, 0, 2 * Math.PI, false); 
+		context.fill();   
+	}
+
+	setFire(val){ this.fire = val; }
+	setPickup(val){ this.pickup = val; }
+}
+
+class Opponent extends Tank {
+	constructor(stage, position, velocity, colour, radius){
+		super(stage, position, velocity, "#ff0000", 10);
+		this.health=1;
+		this.stateVars.concat["fireDelay"];
+		this.amunition=100;
+		this.fireDelay = 400;
+	}
+	setDirection(dx,dy){
+		var newDirection = new Pair(dx,dy);
+		var newVelocity = this.velocity.vecAdd(newDirection);
+		var m = newVelocity.norm2();
+		if(m>2)newVelocity=newVelocity.normalize().sProd(2);
+		this.velocity = newVelocity;
+	}
+	step(){
+		var player = this.stage.player;
+		var toPlayer = player.position.vecSub(this.position).normalize();
+		this.setDirection(toPlayer.x, toPlayer.y);
+		this.pointTurret(player.position);
+		if(toPlayer.norm2()<100){
+			this.fireDelay=this.fireDelay-1;
+			if(this.fireDelay<=0){
+				this.setFire(true);
+				this.fireDelay = 400;
+			}
+		}
+		super.step();
+	}
+}
+
+class Bullet extends Actor {
+	constructor(stage, position, velocity, colour, radius){
+		super(stage, position, velocity, colour, radius);
+		this.lifetime = 200;
+	}
+
+	collide(other, newState){
+		this.makeZombie();
+		other.health--;
+		if(other.health<=0)other.makeZombie();
+	}
+
+	step(){
+		super.step();
+		this.lifetime = this.lifetime -1;
+		if(this.lifetime <= 0)this.makeZombie();
+	}
+	draw(context){
+		context.fillStyle = this.colour;
+		context.beginPath(); 
+		var intPosition = this.position.toInt();
+		context.arc(intPosition.x, intPosition.y, this.radius, 0, 2 * Math.PI, false); 
+		context.fill();   
+	}
+}
 

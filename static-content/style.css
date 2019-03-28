@@ -1,199 +1,65 @@
-#Login {
+#ui_login {
 	display: block;
 }
-#Register {
+#ui_counter, #ui_game {
 	display: none;
 }
-#Game {
-	display: none;
-}
-#Home {
-  display: none;
-}
-#Finish{
-  display: none;
+body {position: relative; margin: 10px; padding: 0; }
 
+header {
+	width: 100%;
 }
-#top {cursor: none;}
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  background: url('background1.gif') no-repeat center center fixed; 
-  background-size: cover;
+header h1 {
+	margin:0px; 
+	float: left;
+	display:inline-block;
 }
 
-* {
-  box-sizing: border-box;
+nav {
+	/* font: 16px Verdana, sans-serif; */
+        float:right; 
 }
 
-/* Add padding to containers */
-.container {
-  padding: 16px;
-  background-color: green;
+nav a {
+	display: inline-block;
+	text-align: center;
+	font: bold 1em sans-serif;
+	padding: 5px 10px; /* top and bottom, left and right */
+	margin: 0 0 2px 0; /* top right bottom left */
+	border: 2px solid black;
+	/* border-width: 0px; */
+	text-decoration: none; /* none, underline, overline, blink */
+	color: #000;
+	background:#6f6;
+}
+nav a:hover {color: #fff;}
+
+.ui_top h2 {
+	text-align: center;
 }
 
-#Login, #Register, #Home {
-  	width: 30%;
-  	margin: auto;
-  	padding: 10px;
-  	background: black;
+.nav_selected {
+	color: #6f6;
+	background: #000;
 }
 
-/* Full-width input fields */
-input[type=text], input[type=password] {
-  width: 100%;
-  padding: 15px;
-  margin: 5px 0 22px 0;
-  display: inline-block;
-  border: none;
-  background: #1B9C2C;	
+div.form-top {
+	border:1px solid black;
+	margin-left: auto;
+	margin-right:auto;
+	padding: 10px;
+    	display: table;
 }
 
-input[type=text]:focus, input[type=password]:focus {
-  opacity: 10;
-  outline: none;
+div.form-row {
+    display: table-row;
+}
+div.form-errors {
+	background: red;
+	color: white;
 }
 
-/* Overwrite default styles of hr */
-hr {
-  border: 1px solid #f1f1f1;
-  margin-bottom: 25px;
+label, input {
+    display: table-cell;
+    margin-bottom: 10px;
 }
-
-/* Set a style for the submit button */
-.btn {
-  background-color: #4CAF50;
-  color: white;
-  padding: 16px 20px;
-  margin: 8px 0;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  opacity: 0.9;
-}
-
-.btn:hover {
-  opacity: 1;
-}
-
-/* Add a blue text color to links */
-a {
-  color: white;
-}
-
-/* Set a grey background color and center the text of the "sign in" section */
-.signin {
-  opacity: 2;
-  text-align: center;
-}
-
-#health {
-  color: red;
-}
-
-
- /* The sidebar menu */
-.GameMenu, .SideMenu {
-  height: 100%; /* Full-height: remove this if you want "auto" height */
-  width: 15%; /* Set the width of the sidebar */
-  position: fixed; /* Fixed Sidebar (stay in place on scroll) */
-  z-index: 1; /* Stay on top */
-  top: 10%; /* Stay at the top */
-  left: 82%;
-  background-color: black; /* Black */
-  overflow-x: hidden; /* Disable horizontal scroll */
-  padding-top: 20px;
-}
-
-.SideMenu {
-  left: 2%;
-}
-
-/* The navigation menu links */
-.GameMenu a, .GameMenu span, .SideMenu a, .SideMenu span {
-  padding: 6px 8px 6px 16px;
-  text-decoration: none;
-  font-size: 25px;
-  color: #818181;
-  display: block;
-}
-
-.GameMenu p, .SideMenu p {
-  font-size: 16px;
-  color: #606060;
-}
-
-/* When you mouse over the navigation links, change their color */
-.GameMenu a:hover, .SideMenu a:hover {
-  color: #f1f1f1;
-}
-
-/* Style page content */
-.main {
-  margin-right: 160px; /* Same as the width of the sidebar */
-  padding: 0px 10px;
-}
-
-/* The Modal (background) */
-#Finish {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 10111; /* Sit on top */
-  padding-top: 100px; /* Location of the box */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-}
-
-/* Modal Content */
-.modal, .over {
-  z-index: 9999;
-  position: relative;
-  background-color: #696969;
-  margin: auto;
-  padding: 0;
-  border: 1px solid #888;
-  width: 50%;
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
-  -webkit-animation-name: animatetop;
-  -webkit-animation-duration: 0.4s;
-  animation-name: animatetop;
-  animation-duration: 0.4s;
-  opacity: .9;
-}
-
-.modal button {
-  background-color: white; /* Green */
-  border: 2px solid #4CAF50;
-  color: black;
-  padding: 16px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  -webkit-transition-duration: 0.4s; /* Safari */
-  transition-duration: 0.4s;
-  cursor: pointer;
-}
-
-.modal button:hover {
-  background-color: #4CAF50;
-  color: white;
-}
-
-#gameOver {
-  font-family:verdana;
-  font-size: 25px;
-  text-align: center;
-}
-.over {
-  color: white;
-  padding:9px 15px;
-  border-bottom:1px solid #eee;
-  background-color: green;
-}
-

@@ -11,7 +11,7 @@
 				$('#message').val("");
 			}
 			
-			(function(){
+			$(function(){
 				// socket = new WebSocket("ws://cslinux.utm.utoronto.ca:10001");
 				socket = new WebSocket("ws://localhost:10001");
 				socket.onopen = function (event) {

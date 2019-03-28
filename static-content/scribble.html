@@ -9,11 +9,10 @@
 			var socket;
 
 			$(function(){
-				console.log("hi");
 				// socket = new WebSocket("ws://cslinux.utm.utoronto.ca:10001");
 				socket = new WebSocket("ws://localhost:10001");
 				socket.onopen = function (event) {
-					//$('#sendButton').removeAttr('disabled');
+					$('#sendButton').removeAttr('disabled');
 					console.log("connected");
 				};
 				socket.onclose = function (event) {
