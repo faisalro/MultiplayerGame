@@ -22,10 +22,31 @@ function showUI(ui){
 		$("#ui_nav a").removeClass("nav_selected");
 		$("#ui_nav a[name="+ui_name+"]").addClass("nav_selected");
 	}
-	if(ui=="#ui_play")startGame();
+	if(ui=="#ui_play"){startGame();setSocket();}
 	else pauseGame();
 	$(ui).show();
 }
+
+function setSocket(){
+	// socket = new WebSocket("ws://cslinux.utm.utoronto.ca:10001");
+	socket = new WebSocket("ws://localhost:10001");
+	socket.onopen = function (event) {
+		console.log("Client Connected");
+	};
+	socket.onclose = function (event) {
+		alert("closed code:" + event.code + " reason:" +event.reason + " wasClean:"+event.wasClean);
+	};
+	socket.onmessage = function (event) {
+		var msg = JSON.parse(event.data);
+		if (msg.type == "player"){
+			stage.initPlayer(msg);
+		} else if (msg.type == "obstacle"){
+			stage.initObstacle(msg);
+		}
+	}
+};
+
+var player = {};
 
 //Get Mouse Position
 function getMousePos(canvas, evt) {
@@ -34,6 +55,10 @@ function getMousePos(canvas, evt) {
         x: evt.clientX - rect.left,
         y: evt.clientY - rect.top
     };
+}
+
+function send(update){
+	socket.send(update);
 }
 
 function setupGame(){
@@ -55,7 +80,7 @@ function setupGame(){
 			stage.player.setPickup(true);
 		}
 	});
-	//report the mouse position on click
+	//report the mouse position on clicks
 	canvas.addEventListener("mousemove", function (event) {
     		var mousePos = getMousePos(canvas, event);
     		// console.log(mousePos.x + ',' + mousePos.y);
@@ -67,6 +92,7 @@ function setupGame(){
 		stage.mouseClick(mousePos.x, mousePos.y);
 	}, false);
 }
+
 
 function startGame(){
 	interval=setInterval(function(){ stage.animate(); },20);

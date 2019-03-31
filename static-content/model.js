@@ -39,12 +39,6 @@ class Stage {
 			this.addActor(b);
 		}
 
-		// Some opponents
-		for(let i=0;i<numOpponents;i++){
-			let s = this.randomState();
-			var b = new Opponent(this, s.position, s.velocity, s.colour, s.radius);
-			this.addActor(b);
-		}
 	}
 	randomState(){
 		var red=randint(255), green=randint(255), blue=randint(255), alpha = Math.random();
@@ -56,6 +50,19 @@ class Stage {
 			colour: 'rgba('+red+','+green+','+blue+','+alpha+')',
 			position : new Pair(x,y),
 			velocity : new Pair(rand(20), rand(20)),
+		}
+	}
+
+	initObstacle(data){
+		let s = this.randomState();
+		var b = new Box(this, new Pair(data.posX, data.posY), data.colour,40);
+		this.addActor(b);
+	}
+
+	initPlayer(data){
+		if (!this.player){
+			var b = new Tank(this, new Pair(data.posX, data.posY), new Pair(data.velocityX, data.velocityY), data.colour, data.radius);
+			this.addPlayer(b);
 		}
 	}
 	
@@ -144,6 +151,7 @@ class Stage {
 		for(var i=0;i<this.actors.length;i++){
 			this.actors[i].draw(context);
 		}
+
 	}
 
 	// return the first actor at coordinates (x,y) return null if there is no such actor

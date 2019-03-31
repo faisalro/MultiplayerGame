@@ -7,7 +7,7 @@
 			var socket;
 
 			function send(){
-				socket.send($('#message').val());
+				socket.send('packet',JSON.stringify({person: "bhoot"}));
 				$('#message').val("");
 			}
 			

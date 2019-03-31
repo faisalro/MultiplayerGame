@@ -1,4 +1,5 @@
-var port = 8000;
+var port = 10000;
+const webPort = port + 1;
 var express = require('express');
 var app = express();
 // app.disable('etag');
@@ -23,6 +24,85 @@ var db = new sqlite3.Database('db/database.db', (err) => {
 
 // https://expressjs.com/en/starter/static-files.html
 app.use(express.static('static-content')); 
+
+var WebSocketServer = require('ws').Server
+   ,wss = new WebSocketServer({port: webPort});
+
+var boxes=[];
+var players=[];
+var playerNum = 0;
+let numBoxes=100;
+const width=10000;
+const height=10000;
+
+function randint(n){ return Math.round(Math.random()*n); }
+function rand(n){ return Math.random()*n; }
+
+initBoxes();
+
+function initBoxes(){
+	for(let i=0;i<numBoxes;i++){
+		let s = randomState();
+		var b = {type : "obstacle", posX : s.posX, posY : s.posY, color: s.colour, length: 40};
+		boxes.push(b);
+	}
+}
+
+function initPlayer(i){
+	let s = randomState();
+	var b = {type : "player", posX : s.posX, posY : s.posY, velocityX:  s.velocityX, velocityY:  s.velocityY, color: s.colour, radius: s.radius, id:i};
+	players.push(b);
+}
+
+function randomState(){
+	var red=randint(255), green=randint(255), blue=randint(255), alpha = Math.random();
+	var x=Math.floor((Math.random()*width)),
+		y=Math.floor((Math.random()*height));
+
+	return {
+		radius : randint(20),
+		colour: 'rgba('+red+','+green+','+blue+','+alpha+')',
+		posX : x,
+		posY : y,
+		velocityX : rand(20),
+		velocityY : rand(20)
+	}
+}
+
+function updatePos(playerId, x, y){
+	for (var i = 0; i < players.length; i ++){
+		
+	}
+}
+
+wss.on('close', function() {
+    console.log('disconnected');
+});
+
+wss.broadcast = function(message){
+	for(let ws of this.clients){ 
+		ws.send(message);
+	}
+}
+
+wss.on('connection', function(ws) {
+	var i;
+	playerNum = playerNum + 1;
+	initPlayer(playerNum);
+	for(i=0;i<boxes.length;i++){
+		ws.send(JSON.stringify(boxes[i]));
+	}
+	for (i = 0; i<players.length; i ++){
+		ws.send(JSON.stringify(players[i]));
+	}
+	ws.on('message', function(message) {
+		const msg = JSON.stringify(message);
+		if (message.type == 'Actor' && message.msg == 'move'){
+			movePlayer(message.id, message.x, message.y);
+		}
+	});
+
+});
 
 function isEmptyObject(obj){
 	return Object.keys(obj).length === 0;

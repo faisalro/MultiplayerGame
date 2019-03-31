@@ -24,7 +24,7 @@ wss.on('close', function() {
 
 wss.broadcast = function(message){
 	for(let ws of this.clients){ 
-		ws.send(message); 
+		ws.emit(message); 
 	}
 
 	// Alternatively
@@ -37,7 +37,7 @@ wss.on('connection', function(ws) {
 		ws.send(messages[i]);
 	}
 	ws.on('message', function(message) {
-		console.log(message);
+		console.log(JSON.parse(message));
 		// ws.send(message); 
 		wss.broadcast(message);
 		messages.push(message);
