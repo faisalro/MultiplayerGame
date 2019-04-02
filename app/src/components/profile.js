@@ -5,17 +5,12 @@ import RadioInput from './radio';
 class ProfileView extends React.Component {
   constructor(props) {
     super(props);
+    console.log("profile make");
     this.state = {
-      selectedSkill: 'beginner',
+
       selectedTime: 'morning'
 
     };
-    this.handleSkillChange = this.handleSkillChange.bind(this);
-  }
-  handleSkillChange(changeEvent){
-    this.setState({
-      selectedSkill: changeEvent.target.value
-    });
   }
   render(props){
     return (

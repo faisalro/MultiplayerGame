@@ -28,13 +28,26 @@ class RadioInput extends React.Component {
   handleChange = event => {
     this.setState({ value: event.target.value });
   };
+  componentDidMount() {
+    var hi = this.refs.skillRadio
+    var low = hi.form;
+    console.log(this.refs.skillRadio.value, this.state.value);
+      if(this.refs.skillRadio.form == this.state.value){
+
+      }else{
+        console.log("here");
+        
+        this.state.value = this.refs.skillRadio.form;
+      }
+  }
 
   render() {
     const { classes } = this.props;
+    console.log("hi", this.state.value);
 
     return (
       <div className={classes.root}>
-        <FormControl component="fieldset" id="skillRadio" form={this.state.value} className={classes.formControl}>
+        <FormControl component="fieldset" id="skillRadio" ref="skillRadio" form={this.state.value} className={classes.formControl}>
           <FormLabel  component="legend">Skill Level</FormLabel>
           <RadioGroup
             className={classes.group}

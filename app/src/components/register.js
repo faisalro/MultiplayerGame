@@ -33,11 +33,7 @@ class RegisterView extends React.Component {
           </div>
           <div>
             <RadioInput />
-            <label>skill</label>
-            <input type="radio" data-name="skill" value="beginner" checked={this.state.selectedSkill === 'beginner'} onChange={this.handleSkillChange} />beginner
-            <input type="radio" data-name="skill" value="intermediate" checked={this.state.selectedSkill === 'intermediate'} onChange={this.handleSkillChange} />intermediate
-            <input type="radio" data-name="skill" value="advanced" checked={this.state.selectedSkill === 'advanced'} onChange={this.handleSkillChange} />advanced
-          </div>
+            </div>
           <div name="birthday">
             <label>Birthday</label>
             <input type="number" min="1900" max="2100" data-name="year" placeholder="year"/>

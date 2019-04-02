@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import {startGame, pauseGame, gui_login, gui_register, gui_profile, gui_profile_load, setupGame} from './controller.js';
+import {startGame, pauseGame, gui_login, gui_register, gui_profile, gui_profile_load, setupGame, moveUp, moveRight, moveDown, moveLeft} from './controller.js';
 import ViewButton from './components/button.js';
 import GameView from './components/game.js';
 import InstructionView from './components/instruction.js';
@@ -31,8 +31,10 @@ class App extends React.Component {
     this.instructionButtonClickHandler = this.instructionButtonClickHandler.bind(this);
     this.updateButtonClickHandler = this.updateButtonClickHandler.bind(this);
     this.playButtonClickHandler = this.playButtonClickHandler.bind(this);
+    this.controlButtonClickHandler = this.controlButtonClickHandler.bind(this);
 
-    this.game = <GameView />;
+    this.game = <GameView controlClickHandler={this.controlButtonClickHandler}/>;
+    this.profileView = <ProfileView updateHandler={this.updateButtonClickHandler}  />;
 
   }
   loginButtonClickHandler(e){
@@ -89,6 +91,27 @@ class App extends React.Component {
 
 
   }
+  controlButtonClickHandler(e){
+    console.log(e);
+    console.log(e.target.id);
+    console.log(e.currentTarget.dataset.id);
+
+    if(e.target.id =="keyboard_key_up"){
+      moveUp();
+
+    }else if(e.target.id =="keyboard_key_down"){
+      moveDown();
+      
+    }else if(e.target.id =="keyboard_key_right"){
+      moveRight();
+      
+    }else if(e.target.id =="keyboard_key_left"){
+      moveLeft();
+      
+    }
+
+
+  }
 
 
   render(){
@@ -116,7 +139,7 @@ class App extends React.Component {
         view = null;
       }else if (this.state.pageProfile) {
 
-        view = <ProfileView updateHandler={this.updateButtonClickHandler}  />;
+        view = this.profileView;
       }else if (this.state.pageInstruction) {
 
         view = <InstructionView />;

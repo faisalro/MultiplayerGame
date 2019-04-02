@@ -45,6 +45,8 @@ class Stage {
 			var b = new Opponent(this, s.position, s.velocity, s.colour, s.radius);
 			this.addActor(b);
 		}
+		// controlls
+		//var up = new Controll()
 	}
 	randomState(){
 		var red=randint(255), green=randint(255), blue=randint(255), alpha = Math.random();
@@ -261,6 +263,21 @@ class Ball extends Actor {
 		return this.position.toString() + " " + this.velocity.toString();
 	}
 }
+/*class Controll extends Actor {
+	constructor(stage, position){
+		this.position = position;
+
+	}
+
+	draw(context){
+		context.fillStyle = "brown";
+   		// context.fillRect(this.x, this.y, this.radius,this.radius);
+		context.beginPath(); 
+		var intPosition = this.position.toInt();
+		context.arc(intPosition.x, intPosition.y, 10, 0, 2 * Math.PI, false); 
+		context.fill();   
+	}
+}*/
 
 class Box extends Actor {
 	constructor(stage, position, colour, radius){

@@ -9,6 +9,10 @@ var stage;
 var view = null;
 var interval=null;
 var canvas=null;
+var up = null;
+var left = null;
+var down = null;
+var right = null;
 var gui_state = {
 	isLoggedIn : false,
 	user     : "",
@@ -30,6 +34,13 @@ export function setupGame(){
 	// Instantiate User:
 	canvas=document.getElementById('stage');
 	stage=new Stage(canvas);
+
+
+	up=document.getElementById('keyboard_key_up');
+	left=document.getElementById('keyboard_key_left');
+	down=document.getElementById('keyboard_key_down');
+	right=document.getElementById('keyboard_key_right');
+	
 
 	// https://javascript.info/keyboard-events
 	document.addEventListener('keydown', function(event){
@@ -56,7 +67,21 @@ export function setupGame(){
     		var mousePos = getMousePos(canvas, event);
     		// console.log(mousePos.x + ',' + mousePos.y);
 		stage.mouseClick(mousePos.x, mousePos.y);
+
+
 	}, false);
+}
+export function moveUp(){
+	stage.player.setDirection(0, -1);
+}
+export function moveDown(){
+	stage.player.setDirection(0, 1);
+}
+export function moveRight(){
+	stage.player.setDirection(1, 0);
+}
+export function moveLeft(){
+	stage.player.setDirection(-1, 0);
 }
 
 export function startGame(){
@@ -213,9 +238,9 @@ export function gui_profile(){
 
 		clearErrors("#ui_profile");
 		var data = getProfileFromFormFunc("#ui_profile", $);
-		//console.log("kjhkbk");
-		//var p = $(formId+" [id=changeSkill]").attr("title");
-		//console.log(p);
+		console.log("kjhkbk");
+		var p = $(formId+" [id=changeSkill]").attr("title");
+		console.log(p);
 		var f = function(response, success){
 			if(success){
 				gui_state.password = data.password; // in case password changed
@@ -231,11 +256,10 @@ export function gui_profile(){
 
 const myFunction = function putDataIntoProfileForm(data){
 	(function ($) {
-		$(document).ready(function(){
-			//console.log("here");
-			//var p = $("input[value='"+data.skill+"']").prop('checked');
-			//console.log(data.skill);
-		//console.log(p);
+			console.log("here");
+			var p = $("input[value='"+data.skill+"']").prop('checked');
+			console.log(data.skill);
+			console.log(p);
 
 		var formId="#ui_profile";
 		$(formId+" [id=user]").html(data.user);
@@ -246,7 +270,10 @@ const myFunction = function putDataIntoProfileForm(data){
 		//$(formId+" [id=skillRadio]").attr("form",data.skill);
 		//$("input[value='intermediate']").prop( "checked", true );
 		//$(formId+ "[value=intermediate]").prop( "checked", true );
-		$("input[value='"+data.skill+"']").prop('checked',true);
+		$("input[value='beginner']").prop('checked',false).change();
+		$("input[value='intermediate']").prop('checked',false).change();
+		$("input[value='advanced']").prop('checked',false).change();
+		$("input[value='"+data.skill+"']").prop('checked',true).change();
 		$(formId+" [data-name=year]").val(data.year);
 		$(formId+" [data-name=month]").val(data.month);
 		$(formId+" [data-name=day]").val(data.day);
@@ -254,12 +281,12 @@ const myFunction = function putDataIntoProfileForm(data){
 		$(formId+" [data-name=playafternoon]").attr('checked', data.playafternoon==1);
 		$(formId+" [data-name=playevening]").attr('checked', data.playevening==1);
 
-		//p = $("input[value='"+data.skill+"']").prop('checked');
-		//console.log("koo");
-		//console.log(p);
+		p = $("input[value='"+data.skill+"']").prop('checked');
+		console.log("koo");
+		console.log(p);
 
 
-	  });
+	 
 	})(jQuery);
 }
 	
