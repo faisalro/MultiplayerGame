@@ -101,20 +101,27 @@ export function api_profile(data, f, credentials){
 }
 
 // f(message, success)
-export function api_profile_load(f, credentials){
-	(function ($) {
-		$(document).ready(function(){
+export function api_profile_load(f, credentials, callB){
+	var skilb = "ppp";
+	
+	var aaskill =  (function ($) {
+		
 
 		var data = { "credentials" : credentials };
+		//var skil = "oooll";
 		$.ajax({ 
 			method: "GET", 
 			url: "/api/user/"+credentials.user, 
 			dataType: "json", 
+			//async: false,
+			success : callB,
+
 			data: { "password" : credentials.password } // send URL encoded credentials
 		}).done(function(data, text_status, jqXHR){
 			console.log(text_status); 
 			console.log(jqXHR.status); 
-			f(data, true);
+			//skil = data.data.skill;
+			//console.log(data);
 			/** console.log(JSON.stringify(data)); console.log(text_status); console.log(jqXHR.status); **/
 		}).fail(function(err){
 			let response = {};
@@ -123,9 +130,15 @@ export function api_profile_load(f, credentials){
 			f(response, false);
 			/** console.log(err.status); console.log(JSON.stringify(err.responseJSON)); **/
 		});
+		//console.log("skil 1",skil);
+		return "hhh";
 
-	  });
 	})(jQuery);
+	console.log(skilb, "skillbbbbb");
+
+	
+  	console.log("returning", skilb);
+	return skilb;
 	
 }
 

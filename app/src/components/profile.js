@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
+import jQuery from 'jquery';
 import ViewButton from './button';
 import ViewInput from './input';
 import RadioInput from './radio';
+//import {changeFormSkill} from './updates';
+import {gui_profile_load} from '../controller.js';
 class ProfileView extends React.Component {
   constructor(props) {
     super(props);
@@ -11,8 +14,22 @@ class ProfileView extends React.Component {
       selectedTime: 'morning'
 
     };
+    //this.findSkill = 'beginner';
+    this.radio = <RadioInput />;
+  }
+  componentDidMount() {/*
+    //gui_profile_load(changeFormSkill);
+    this.findSkill = (function ($) {
+    var formId = "#ui_profile";
+    var skk = $(formId+" [id=changeSkill]").attr("title");
+    console.log(skk);
+     return skk;
+    })(jQuery);
+
+    console.log("mounting", this.findSkill);*/
   }
   render(props){
+
     return (
       <div style={{border:"1px solid black"}} > 
         <div id="ui_profile">
@@ -26,7 +43,7 @@ class ProfileView extends React.Component {
             <ViewInput name={"confirmpassword"} placeholder={"Confirm Password"} type={"password"}/>
           </div>
           <div >
-            <RadioInput />
+            {this.radio}
           </div>
           <div  name="birthday">
             <label>Birthday</label>

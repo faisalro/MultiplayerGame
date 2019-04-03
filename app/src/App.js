@@ -72,7 +72,7 @@ class App extends React.Component {
   profileButtonClickHandler(e){
     this.setState({pageLogIn: false, pageRegister: false, pageGame: false, pageProfile: true, pageInstruction: false, pageStats: false});
     pauseGame();
-    gui_profile_load();
+    //gui_profile_load();
 
   }
   instructionButtonClickHandler(e){
@@ -92,9 +92,6 @@ class App extends React.Component {
 
   }
   controlButtonClickHandler(e){
-    console.log(e);
-    console.log(e.target.id);
-    console.log(e.currentTarget.dataset.id);
 
     if(e.target.id =="keyboard_key_up"){
       moveUp();

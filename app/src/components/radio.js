@@ -7,6 +7,9 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
+import {getData} from '../controller.js';
+//import changeFormSkill from './updates.js';
+import {gui_profile_load} from '../controller.js';
 
 const styles = theme => ({
   root: {
@@ -21,24 +24,39 @@ const styles = theme => ({
 });
 
 class RadioInput extends React.Component {
-  state = {
-    value: 'beginner',
-  };
+  constructor() {
+    super();
+    this.state = {
+      value: 'beginner',
+    };
+    //this.changeFormSkill = changeFormSkill.bind(this);
+  }
+  
+  
 
   handleChange = event => {
     this.setState({ value: event.target.value });
   };
   componentDidMount() {
-    var hi = this.refs.skillRadio
-    var low = hi.form;
-    console.log(this.refs.skillRadio.value, this.state.value);
-      if(this.refs.skillRadio.form == this.state.value){
+/*    var d = getData();
+    console.log("hiii", d.skill);
+    if(d.skill != this.state.value){
+      this.state.value = d.skill;
+    }*/
+    var vall = "lll";
+    this.callB = callB.bind(this);
+    function callB(data) {
 
-      }else{
-        console.log("here");
+        //skilb = data.data.skill;
         
-        this.state.value = this.refs.skillRadio.form;
-      }
+        vall = data.data.skill;
+        console.log(vall, "ajohnnlnl");
+        this.setState({ value: vall });
+
+    }
+    var skii = gui_profile_load(callB);
+    console.log("skii",vall);
+    this.setState({ value: vall });
   }
 
   render() {

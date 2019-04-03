@@ -18,6 +18,7 @@ var gui_state = {
 	user     : "",
 	password : ""
 };
+var dataB = null;
 
 //Get Mouse Position
 function getMousePos(canvas, evt) {
@@ -222,6 +223,7 @@ export function gui_register(){
 		//console.log(p);
 		var f = function(response, success){
 			if(success){
+				dataB = response.data;
 			} else {
 				showErrors("#ui_register",response);
 			}
@@ -255,7 +257,7 @@ export function gui_profile(){
 }
 
 const myFunction = function putDataIntoProfileForm(data){
-	(function ($) {
+	var skillss = (function ($) {
 			console.log("here");
 			var p = $("input[value='"+data.skill+"']").prop('checked');
 			console.log(data.skill);
@@ -284,25 +286,53 @@ const myFunction = function putDataIntoProfileForm(data){
 		p = $("input[value='"+data.skill+"']").prop('checked');
 		console.log("koo");
 		console.log(p);
+	     return data.skill;
 
 
 	 
 	})(jQuery);
+	console.log("skillss", skillss)
+	return skillss;
 }
 	
-
-export function gui_profile_load(){
-	var credentials = { user: gui_state.user, password: gui_state.password };
+export function getData(){
+	console.log("got here");
+	const dataB = null;
 	var f = function(response, success){
 		if(success){
 			// response.data has fields to load into our form
-			myFunction(response.data);
+			console.log("heree", response.data)
+			dataB = response.data;
 		} else {
-			showErrors("#ui_profile",response);
+			console.log("what");
 		}
 	}
 	var credentials = { user: gui_state.user, password: gui_state.password };
 	api_profile_load(f, credentials);
+	//console.log(dataB);
+	return dataB;
+
+}
+export function gui_profile_load(callB){
+	var credentials = { user: gui_state.user, password: gui_state.password };
+	var f = function(response, success){
+		var skill = "yay";
+		if(success){
+			// response.data has fields to load into our form
+			skill = myFunction(response.data);
+			console.log(response.data.skill, "calling radio skill function");
+			//skill_f(response.data.skill);
+		} else {
+			showErrors("#ui_profile",response);
+		}
+		return skill;
+	}
+	var credentials = { user: gui_state.user, password: gui_state.password };
+	var s = "ooppp"
+	
+	var skillzz = api_profile_load(f, credentials, callB);
+	console.log(s, skillzz);
+	return skillzz;
 }
 
 /*// This is executed when the document is ready (the DOM for this document is loaded)
