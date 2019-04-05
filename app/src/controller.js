@@ -14,6 +14,8 @@ var gui_state = {
 	user     : "",
 	password : ""
 };
+var shake = false;
+
 
 const soc =function getSocket() {
 
@@ -147,6 +149,25 @@ function activateListeners(){
 			} else if(key=="e"){
 				update(requestPickup());
 			}
+			if (window.DeviceOrientationEvent) {
+				var frontToBack = event.beta;
+				window.addEventListener("deviceorientation", function(event) {
+						// alpha: rotation around z-axis
+						var rotateDegrees = event.alpha;
+						// gamma: left to right
+						var leftToRight = event.gamma;
+						// beta: front back motion
+						if (frontToBack <= event.beta-5){
+							if (stage == true){
+								update(requestPickup());
+								shake = false;
+							} 
+						}
+						if (frontToBack >= event.beta-5){
+							shake = true;
+						}
+			}, true);
+		}
 		});
 		//report the mouse position on click
 		canvas.addEventListener("mousemove", function (event) {

@@ -90,7 +90,6 @@ wss.on('connection', function(ws) {
 	}
 	ws.on('message', function(message) {
 		const msg = JSON.parse(message);
-		console.log("i: "+message);
 		if (msg.type == "close"){
 			ws.close();
 		} else {
