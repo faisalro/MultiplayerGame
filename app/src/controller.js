@@ -1,5 +1,5 @@
 import jQuery from 'jquery';
-import Stage from './model';
+import Stage from './render';
 //const Stage = require('./model.js');
 import {api_login, api_register, api_profile, api_profile_load} from './rest.js';
 //const Stage = require('./model.js');
@@ -15,6 +15,85 @@ var gui_state = {
 	password : ""
 };
 
+const soc =function getSocket() {
+
+  if (getSocket.server && getSocket.server.readyState < 2) {
+    return Promise.resolve(getSocket.server);
+  }
+
+  return new Promise(function (resolve, reject) {
+
+    getSocket.server = new WebSocket("ws://localhost:10062");
+
+    getSocket.server.onopen = function () {
+      console.log("Connected to Socket");
+      resolve(getSocket.server);
+    };
+
+    getSocket.server.onerror = function (err) {
+      console.error("socket connection error : ", err);
+      reject(err);
+		};
+		getSocket.server.onmessage = function (event) {
+			var msg = JSON.parse(event.data);
+			if (stage==null){
+				stage=new Stage(canvas, msg.width, msg.height);
+			}
+			if (msg.isZombie == true){
+				console.log("zombie: "+event.data);
+				if (msg.id == stage.player.id && msg.type == "player"){
+					alert("Game Over");
+					update({type: "close"});
+					return ;
+				}
+				stage.getActorbyId(msg.id).makeZombie();
+			}
+			if (msg.type == "player"){
+				if (msg.msg == "init"){
+					//console.log("1"+event.data);
+					if (stage.player == null){
+						stage.initPlayer(msg);
+						startGame();
+						activateListeners();
+					} 
+				}
+				
+				else if(msg.msg == "move" && stage.player.id == msg.id) {
+					//console.log("2 "+event.data);
+					stage.player.updatePos(msg.x, msg.y);
+				}
+				else if (msg.msg == "other" && msg.id != stage.player.id){
+					//console.log("3"+event.data);
+					stage.initOpponent(msg);
+				} 
+				else{
+					console.log("other: "+event.data);
+					stage.updateOpponents(msg.x, msg.y, msg.id);
+				}
+			} 
+			else if (msg.type == "obstacle"){
+				stage.initObstacle(msg);
+			}
+			else if (msg.type == "bullet"){
+				if (stage.getBullet(msg.id) == null){
+					console.log("init: "+event.data);
+					stage.initShot(msg);
+				} else {
+					console.log("update: "+event.data);
+					stage.updateBullet(msg.x, msg.y , msg.id);
+				}
+				
+			}
+			
+		}
+  });
+}
+
+function send(data){
+	soc.server.send(JSON.stringify(data));
+}
+/*  */
+
 //Get Mouse Position
 function getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
@@ -29,39 +108,67 @@ export function setupGame(){
 	//console.log("stage set");
 	// Instantiate User:
 	canvas=document.getElementById('stage');
-	stage=new Stage(canvas);
+	soc();	
 
-	// https://javascript.info/keyboard-events
-	document.addEventListener('keydown', function(event){
-		var key = event.key;
-		var moveMap = { 
-			'a': { "dx": -1, "dy": 0},
-			's': { "dx": 0, "dy": 1},
-			'd': { "dx": 1, "dy": 0},
-			'w': { "dx": 0, "dy": -1}
-		};
-		if(key in moveMap){
-			stage.player.setDirection(moveMap[key].dx, moveMap[key].dy);
-		} else if(key=="e"){
-			stage.player.setPickup(true);
-		}
-	});
-	//report the mouse position on click
-	canvas.addEventListener("mousemove", function (event) {
-    		var mousePos = getMousePos(canvas, event);
-    		// console.log(mousePos.x + ',' + mousePos.y);
-		stage.mouseMove(mousePos.x, mousePos.y);
-	}, false);
-	canvas.addEventListener("click", function (event) {
-    		var mousePos = getMousePos(canvas, event);
-    		// console.log(mousePos.x + ',' + mousePos.y);
-		stage.mouseClick(mousePos.x, mousePos.y);
-	}, false);
 }
 
-export function startGame(){
-	console.log("start");
-	
+function update(msg){
+	console.log(msg);
+	send(msg);
+}
+
+function requestMove(x,y){
+	var temp = Object.assign({}, stage.player.toString());
+	temp.x = x;
+	temp.y = y;
+	temp.msg = "move";
+	return temp;
+}
+
+function requestFire(){
+	var temp = Object.assign({}, stage.player.toString());
+	temp.fire = true;
+	temp.x = stage.player.turretDirection.x;
+	temp.y = stage.player.turretDirection.y;
+	return temp;
+}
+
+function requestPickup(){
+	var temp = Object.assign({}, stage.player.toString());
+	temp.pickup = true;
+	return temp;
+}
+
+function activateListeners(){
+		// https://javascript.info/keyboard-events
+		document.addEventListener('keydown', function(event){
+			var key = event.key;
+			var moveMap = { 
+				'a': { "dx": -1, "dy": 0},
+				's': { "dx": 0, "dy": 1},
+				'd': { "dx": 1, "dy": 0},
+				'w': { "dx": 0, "dy": -1}
+			};
+			if(key in moveMap){
+				update(requestMove(moveMap[key].dx, moveMap[key].dy));
+			} else if(key=="e"){
+				update(requestPickup());
+			}
+		});
+		//report the mouse position on click
+		canvas.addEventListener("mousemove", function (event) {
+					var mousePos = getMousePos(canvas, event);
+					// console.log(mousePos.x + ',' + mousePos.y);
+			stage.mouseMove(mousePos.x, mousePos.y);
+		}, false);
+		canvas.addEventListener("click", function (event) {
+					var mousePos = getMousePos(canvas, event);
+					// console.log(mousePos.x + ',' + mousePos.y);
+			update(requestFire());
+		}, false);
+}
+
+export function startGame(){	
 	interval=null;
 	interval=setInterval(function(){ 
 		stage.animateDraw(); 
@@ -81,7 +188,6 @@ function clearErrors(ui){
 
 	  });
 	})(jQuery);
-	
 }
 
 function showErrors(ui,response){
@@ -114,41 +220,9 @@ export function gui_login(){
 				gui_state.isLoggedIn=true;
 				gui_state.user=user;
 				gui_state.password=password;
-				//console.log("logged in");
-				//const Stage = require('./model.js');
-				//console.log("stage set");
 				// Instantiate User:
 				canvas=document.getElementById('stage');
-				stage=new Stage(canvas);
-
-				// https://javascript.info/keyboard-events
-				document.addEventListener('keydown', function(event){
-					var key = event.key;
-					var moveMap = { 
-						'a': { "dx": -1, "dy": 0},
-						's': { "dx": 0, "dy": 1},
-						'd': { "dx": 1, "dy": 0},
-						'w': { "dx": 0, "dy": -1}
-					};
-					if(key in moveMap){
-						stage.player.setDirection(moveMap[key].dx, moveMap[key].dy);
-					} else if(key=="e"){
-						stage.player.setPickup(true);
-					}
-				});
-				//report the mouse position on click
-				canvas.addEventListener("mousemove", function (event) {
-			    		var mousePos = getMousePos(canvas, event);
-			    		// console.log(mousePos.x + ',' + mousePos.y);
-					stage.mouseMove(mousePos.x, mousePos.y);
-				}, false);
-				canvas.addEventListener("click", function (event) {
-			    		var mousePos = getMousePos(canvas, event);
-			    		// console.log(mousePos.x + ',' + mousePos.y);
-					stage.mouseClick(mousePos.x, mousePos.y);
-				}, false);
-				interval=setInterval(function(){ stage.animateDraw(); },20);
-
+				setupGame();
 			} else {
 				gui_state.isLoggedIn=false;
 				gui_state.user="";

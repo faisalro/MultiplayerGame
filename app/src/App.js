@@ -39,9 +39,6 @@ class App extends React.Component {
     gui_login();
     this.setState({loggedIn: true, pageLogIn: false, pageRegister: false, pageGame: true, pageProfile: false, pageInstruction: false, pageStats: false});
 
-    
-
-
   }
   registerButtonClickHandler(e){
     if(this.state.pageLogIn){

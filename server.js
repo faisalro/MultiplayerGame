@@ -1,7 +1,11 @@
-var port = 8000;
+var port = 10060;
 var express = require('express');
+var model = require('./model');
 var app = express();
+const webPort = port + 2;
 // app.disable('etag');
+
+
 
 // http://www.sqlitetutorial.net/sqlite-nodejs/connect/
 const sqlite3 = require('sqlite3').verbose();
@@ -23,6 +27,113 @@ var db = new sqlite3.Database('db/database.db', (err) => {
 
 // https://expressjs.com/en/starter/static-files.html
 app.use(express.static('static-content')); 
+
+var WebSocketServer = require('ws').Server
+   ,wss = new WebSocketServer({port: webPort});
+
+var socketMap = [];
+var interval = null;
+
+var stage = new model();
+function updateSocketMap(ws, id){
+	socketMap.push({
+		soc: ws,
+		player: id
+	});
+
+};
+
+function setInit(map){
+	var temp = Object.assign({}, map);
+	temp.msg = "init";
+	return temp;
+}
+
+function setOther(map){
+	var temp = Object.assign({}, map);
+	temp.msg = "other";
+	return temp;
+}
+
+function setMove(map){
+	var temp = Object.assign({}, map);
+	temp.msg = "move";
+	return temp;
+}
+
+wss.on('close', function() {
+    console.log('disconnected');
+});
+
+
+wss.broadcast = function(message){
+	for(let ws of this.clients){ 
+		ws.send(message);
+	}
+}
+
+wss.on('connection', function(ws) {
+	var i;
+	var t;
+	ws.send(JSON.stringify({width: stage.width, height: stage.height}));
+	syncChanges();
+	for(i=0;i<stage.obstacles.length;i++){
+		ws.send(JSON.stringify(stage.obstacles[i].toString()));
+	}
+	var newPlayer = stage.initPlayer();
+	updateSocketMap(ws, stage.actorId);
+
+	ws.send(JSON.stringify(setInit(newPlayer)));
+	wss.broadcast(JSON.stringify(setOther(newPlayer)));
+	for (t = 0; t<stage.players.length-1; t ++){
+		ws.send(JSON.stringify(setOther(stage.players[t].toString())));
+	}
+	ws.on('message', function(message) {
+		const msg = JSON.parse(message);
+		console.log("i: "+message);
+		if (msg.type == "close"){
+			ws.close();
+		} else {
+			if (msg.type == 'player'){
+				if(msg.msg == 'move'){
+					let player = stage.getPlayer(msg.id);
+					player.setDirection(msg.x, msg.y);
+				} if (msg.fire == true){
+					stage.getPlayer(msg.id).setTurret(msg.x, msg.y);
+					stage.getPlayer(msg.id).setFire(msg.fire);
+				} if (msg.pickup == true){
+					stage.getPlayer(msg.id).setPickup(msg.pickup);
+				}
+			}
+		}
+	});
+
+});
+
+function syncChanges(){
+	interval=null;
+	interval=setInterval(function(){ 
+		stage.step();
+		stage.actors = stage.actors.filter(actor => !actor.isZombie);
+
+		for (let i = 0; i < stage.players.length; i ++){
+			let b = stage.players[i];
+			if (b != null){
+				wss.broadcast(JSON.stringify(setMove(b.toString())));
+			}
+		}	
+		for (let i = 0; i < stage.bullets.length; i ++){
+			let b = stage.bullets[i];
+			if (b != null){
+				wss.broadcast(JSON.stringify(setMove(b.toString())));
+			}
+		}
+		stage.players = stage.players.filter(actor => !actor.isZombie);
+		stage.bullets = stage.bullets.filter(actor => !actor.isZombie);
+		
+	},20);
+}
+	
 
 function isEmptyObject(obj){
 	return Object.keys(obj).length === 0;
