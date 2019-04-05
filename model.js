@@ -279,7 +279,6 @@ class Bullet extends Actor {
 	}
 
 	collide(other, newState){
-		console.log("he: "+ JSON.stringify(other.toString()));
 		this.makeZombie();
 		other.health--;
 		if(other.health<=0)other.makeZombie();

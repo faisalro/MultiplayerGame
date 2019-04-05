@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import {startGame, pauseGame, gui_login, gui_register, gui_profile, gui_profile_load, setupGame, moveUp, moveRight, moveDown, moveLeft} from './controller.js';
+import {startGame, pauseGame, gui_login, gui_register, gui_profile, gui_profile_load, setupGame} from './controller.js';
 import ViewButton from './components/button.js';
 import GameView from './components/game.js';
 import InstructionView from './components/instruction.js';
@@ -31,10 +31,8 @@ class App extends React.Component {
     this.instructionButtonClickHandler = this.instructionButtonClickHandler.bind(this);
     this.updateButtonClickHandler = this.updateButtonClickHandler.bind(this);
     this.playButtonClickHandler = this.playButtonClickHandler.bind(this);
-    this.controlButtonClickHandler = this.controlButtonClickHandler.bind(this);
 
-    this.game = <GameView controlClickHandler={this.controlButtonClickHandler}/>;
-    this.profileView = <ProfileView updateHandler={this.updateButtonClickHandler}  />;
+    this.game = <GameView />;
 
   }
   loginButtonClickHandler(e){
@@ -69,7 +67,7 @@ class App extends React.Component {
   profileButtonClickHandler(e){
     this.setState({pageLogIn: false, pageRegister: false, pageGame: false, pageProfile: true, pageInstruction: false, pageStats: false});
     pauseGame();
-    //gui_profile_load();
+    gui_profile_load();
 
   }
   instructionButtonClickHandler(e){
@@ -85,24 +83,6 @@ class App extends React.Component {
   playButtonClickHandler(e){
     this.setState({pageLogIn: false, pageRegister: false, pageGame: true, pageProfile: false, pageInstruction: false, pageStats: false});
     startGame();
-
-
-  }
-  controlButtonClickHandler(e){
-
-    if(e.target.id =="keyboard_key_up"){
-      moveUp();
-
-    }else if(e.target.id =="keyboard_key_down"){
-      moveDown();
-      
-    }else if(e.target.id =="keyboard_key_right"){
-      moveRight();
-      
-    }else if(e.target.id =="keyboard_key_left"){
-      moveLeft();
-      
-    }
 
 
   }
@@ -133,7 +113,7 @@ class App extends React.Component {
         view = null;
       }else if (this.state.pageProfile) {
 
-        view = this.profileView;
+        view = <ProfileView updateHandler={this.updateButtonClickHandler}  />;
       }else if (this.state.pageInstruction) {
 
         view = <InstructionView />;

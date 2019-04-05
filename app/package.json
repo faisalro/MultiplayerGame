@@ -12,16 +12,10 @@
     "react-scripts": "^2.1.8"
   },
   "scripts": {
-<<<<<<< HEAD
     "start": "PORT='10061' react-scripts start",
-=======
-    "start": "HOST='142.1.200.143' PORT='10061' react-scripts start",
->>>>>>> f1c4d9cd87b7218c19b17649f81629488c554152
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "HOST":
-    "PORT"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -32,9 +26,5 @@
     "not ie <= 11",
     "not op_mini all"
   ],
-<<<<<<< HEAD
   "proxy": "http://localhost:10060/"
-=======
-  "proxy": "http://142.1.200.143:10060/"
->>>>>>> f1c4d9cd87b7218c19b17649f81629488c554152
 }

@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-//var port = 8000;
->>>>>>> f1c4d9cd87b7218c19b17649f81629488c554152
 var port = 10060;
 var express = require('express');
 var model = require('./model');
@@ -282,9 +278,7 @@ app.put('/api/user/:user', function (req, res) {
 });
 
 app.get('/api/user/:user', function (req, res) {
-	// console.log(JSON.stringify(req));
-	// var user = req.body.user;
-	// var password = req.body.password;
+
 
 	var user = req.params.user;
 	var password = req.query.password;
