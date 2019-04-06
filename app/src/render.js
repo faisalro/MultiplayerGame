@@ -70,7 +70,6 @@ class Stage {
 	mouseClick(x,y){
 		var canvasPosition=new Pair(x,y);
 		var worldPosition=this.mapCanvasToWorld(canvasPosition);
-		//this.player.setFire(true);
 	}
 
 	addPlayer(player){
@@ -111,15 +110,9 @@ class Stage {
 		let playerPosition = this.player.position.toInt();
 		let x=playerPosition.x;
 		let y=playerPosition.y;
-		// console.log("x="+x+" y="+y);
 
 		let xt=-x+this.canvasWidth/2;
-		// if(x<this.canvasWidth/2)xt=0;
-		// if(x>this.width-this.canvasWidth/2)xt=-this.width+this.canvasWidth;
-
 		let yt=-y+this.canvasHeight/2;
-		// if(y<this.canvasHeight/2)yt=0;
-		// if(y>this.height-this.canvasHeight/2)yt=-this.height+this.canvasHeight;
 
 		context.resetTransform();
 
@@ -134,7 +127,8 @@ class Stage {
 		}
 
     }
-    	// return the first actor at coordinates (x,y) return null if there is no such actor
+	
+	// return the first actor at coordinates (x,y) return null if there is no such actor
 	getActor(x, y){
 		for(var i=0;i<this.actors.length;i++){
 			if(this.actors[i].x==x && this.actors[i].y==y){
@@ -144,7 +138,8 @@ class Stage {
 		return null;
 	}
 	
-	getActorbyId(id, type){
+	// returns the actor with the id
+	getActorbyId(id){
 		for(var i=0;i<this.actors.length;i++){
 			if(this.actors[i].id == id){
 				return this.actors[i];
@@ -152,6 +147,8 @@ class Stage {
 		}
 		return null;
 	}
+
+	// gets the bullet with the id (implemented for efficiency purposes with regards to the actors array)
 	getBullet(id){
 		for(var i=0;i<this.bullets.length;i++){
 			if(this.bullets[i].id == id){
@@ -164,9 +161,10 @@ class Stage {
 export default Stage;
 
 class Actor {
-	constructor(stage, position, colour, radius){
+	constructor(stage, position, colour, radius, id){
 		this.stage = stage;
 		// Below is the state of this
+		this.id = id;
 		this.position=position;
 		this.colour = colour;
 		this.radius = radius;
@@ -174,6 +172,7 @@ class Actor {
 
 		this.stateVars = [ "position" , "colour", "radius", "isZombie", "health" ]; // should be static
 		this.savedState = {};
+		
 	}
 
 	makeZombie(){ this.isZombie = true; }
@@ -200,16 +199,14 @@ class Actor {
     }
 }
 class Tank extends Actor {
-	constructor(stage, position, colour, playerId){
-		super(stage, position, colour, 10);
-		this.colour = colour;
+	constructor(stage, position, colour, id){
+		super(stage, position, colour, 10, id);
 		this.stateVars.concat(["fire", "amunition", "pickup"]);
-		this.id = playerId;
 		this.turretDirection = new Pair(1,0);
 		this.fire = false; // whether we have to fire a bullet in the next step
 		this.pickup = false;
 		this.ammunition = 0;
-		this.playerId = playerId;
+		this.id = id;
 	}
 
 	// Point the turret at crosshairs in world coordinates
@@ -247,16 +244,14 @@ class Tank extends Actor {
 		return { msg: "",type : "player", x : this.position.x, y : this.position.y, id:this.id, fire: false, pickup: false};
 	}
 }
+
 class Opponent extends Tank {
 	constructor(stage, position, id){
-		super(stage, position,0,0, '#DAA520', 10);
-		this.id = id;
-		this.colour = '#DAA520';
+		super(stage, position,'#DAA520', id);
 	}
 	updatePos(x,y){
-		this.position = new Pair(x,y);;
+		this.position = new Pair(x,y);
 	}
-	
 }
 
 class Pair {
@@ -274,7 +269,7 @@ class Pair {
 
 class Box extends Actor {
 	constructor(stage, position){
-		super(stage, position, '#8B4513', 40);
+		super(stage, position, '#8B4513', 40, -1);
 	}
 	draw(context){
 		var intPosition = this.position.toInt();
@@ -292,9 +287,8 @@ class Box extends Actor {
 
 class Bullet extends Actor {
 	constructor(stage, position, radius, id){
-		super(stage, position, '#000', radius);
+		super(stage, position, '#000', radius, id);
 		this.lifetime = 200;
-		this.id = id;
 	}
 
 	updatePos(x,y){

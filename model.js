@@ -21,12 +21,10 @@ class Stage {
 	}
 
 	randomState(){
-		var red=randint(255), green=randint(255), blue=randint(255), alpha = Math.random();
 		var x=Math.floor((Math.random()*this.width)),
 			y=Math.floor((Math.random()*this.height));
 	
 		return {
-			colour: 'rgba('+red+','+green+','+blue+','+alpha+')',
 			posX : x,
 			posY : y,
 			velocityX : rand(20),
@@ -34,6 +32,7 @@ class Stage {
 		}
 	}
 
+	//init an obstacle and add it to appropriate lists
 	initObstacle(){
 		var data;
 		for(let i=0;i<this.numBoxes;i++){
@@ -44,6 +43,7 @@ class Stage {
 		}
 	}
 
+	//init a player and add it to appropriate lists
 	initPlayer(){
 		let data = this.randomState();
 		var b = new Tank(this, new Pair(0+10*this.actorId, 0+10*this.actorId), new Pair(data.velocityX, data.velocityY), this.actorId);
@@ -53,10 +53,12 @@ class Stage {
 		return b.toString();
 	}
 
+	//add actor
 	addActor(actor){
 		this.actors.push(actor);
 	}
  
+	// remove actor form the actors array
 	removeActor(actor){
 		var index=this.actors.indexOf(actor);
 		if(index!=-1){
@@ -82,7 +84,7 @@ class Stage {
 		return null;
 	}
 
-
+	// given an id, return the player from the players array
 	getPlayer(id){
 		for(var i=0;i<this.players.length;i++){
 			if(this.players[i].id == id){
@@ -92,6 +94,7 @@ class Stage {
 		return null;
 	}
 
+	// given an id, remove the player from the players array
 	removePlayer(id){
 		for(var i=0;i<this.players.length;i++){
 			if(this.players[i].id == id){
@@ -101,6 +104,7 @@ class Stage {
 		return null;
 	}
 
+	// given an id, return the bullet from the bullets array
 	getBullet(id){
 		for(var i=0;i<this.bullets.length;i++){
 			if(id == 0 || this.bullets[i].id == id){
@@ -123,7 +127,7 @@ class Pair {
 	vecSub(other){ return new Pair(this.x-other.x, this.y-other.y); }
 }
 class Actor {
-	constructor(stage, position, velocity, id){
+	constructor(stage, position, velocity, id, radius){
 		this.stage = stage;
 
 		// Below is the state of this
@@ -132,6 +136,7 @@ class Actor {
 		this.id = id;
 		this.health = 10;
 		this.isZombie = false;
+		this.radius = radius;
 
 		this.stateVars = [ "position" , "velocity", "colour", "radius", "isZombie", "health" ]; // should be static
 		this.savedState = {};
@@ -193,20 +198,18 @@ class Actor {
 			this.velocity.y=-Math.abs(this.velocity.y);
 		}
 	}
+	toString(){
+		return { msg: "",type : this.type, x : this.position.x, y : this.position.y, id: this.id, isZombie: this.isZombie};
+	}
 }
 
 
 class Box extends Actor {
 	constructor(stage, position){
-		var velocity = new Pair(0,0);
-		super(stage, position, velocity, -1);
-		this.radius = 40;
+		super(stage, position, new Pair(0,0), -1, 40);
+		this.type = "obstacle";
 	}
 	step(){ return; }
-
-	toString(){
-		return {msg: "", type : "obstacle", x : this.position.x, y : this.position.y};
-	}
 	
 }
 
@@ -214,12 +217,11 @@ class Tank extends Actor {
 	constructor(stage, position, velocity, id){
 		super(stage, position, velocity, id, 10);
 		this.stateVars.concat["fire", "amunition", "pickup"];
-		this.id = id;
 		this.turretDirection = new Pair(1,0);
 		this.fire = false; // whether we have to fire a bullet in the next step
 		this.pickup = false;
 		this.ammunition = 0;
-		this.radius = 10;
+		this.type = "player";
 	}
 
 	setTurret(x, y){
@@ -234,9 +236,9 @@ class Tank extends Actor {
 		}
 	}
 	getTurretPosition(){
-		// position = ((x,y)+turretDirection*this.radius).toInt()
 		return this.position.vecAdd(this.turretDirection.sProd(this.radius));
 	}
+	
 	step(){
 		if(this.fire && this.amunition>0){
 			this.amunition--;
@@ -274,17 +276,13 @@ class Tank extends Actor {
 	setFire(val){ this.fire = val; }
 	setPickup(val){ this.pickup = val; }
 	
-	toString(){
-		return { msg: "",type : "player", x : this.position.x, y : this.position.y, id:this.id, isZombie: this.isZombie};
-	}
 }
 
 class Bullet extends Actor {
 	constructor(stage, position, velocity, radius, id){
-		super(stage, position, velocity, '#000');
+		super(stage, position, velocity, id, radius);
 		this.lifetime = 200;
-		this.radius = radius;
-		this.id = id;
+		this.type = "bullet";
 	}
 
 	collide(other, newState){
@@ -298,9 +296,7 @@ class Bullet extends Actor {
 		this.lifetime = this.lifetime -1;
 		if(this.lifetime <= 0)this.makeZombie();
 	}
-	toString(){
-		return { msg: "",type : "bullet", x : this.position.x, y : this.position.y, id: this.id, isZombie: this.isZombie};
-	}
+
 }
 
 module.exports = Stage;	

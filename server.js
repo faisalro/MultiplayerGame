@@ -3,20 +3,12 @@ var express = require('express');
 var model = require('./model');
 var app = express();
 const webPort = port + 2;
-// app.disable('etag');
-
-
-
-// http://www.sqlitetutorial.net/sqlite-nodejs/connect/
 const sqlite3 = require('sqlite3').verbose();
 
-// https://scotch.io/tutorials/use-expressjs-to-get-url-and-post-parameters
 var bodyParser = require('body-parser');
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
-// http://www.sqlitetutorial.net/sqlite-nodejs/connect/
-// https://github.com/mapbox/node-sqlite3/wiki/API
 // will create the db if it does not exist
 var db = new sqlite3.Database('db/database.db', (err) => {
 	if (err) {
@@ -25,7 +17,6 @@ var db = new sqlite3.Database('db/database.db', (err) => {
 	console.log('Connected to the database.');
 });
 
-// https://expressjs.com/en/starter/static-files.html
 app.use(express.static('static-content')); 
 
 var WebSocketServer = require('ws').Server
@@ -35,14 +26,13 @@ var socketMap = [];
 var interval = null;
 
 var stage = new model();
+
 function updateSocketMap(ws, id){
 	socketMap.push({
 		soc: ws,
 		player: id
 	});
-
 };
-
 
 function setInit(map){
 	var temp = Object.assign({}, map);
@@ -66,7 +56,6 @@ wss.on('close', function() {
     console.log('disconnected');
 });
 
-
 wss.broadcast = function(message){
 	for(let ws of this.clients){ 
 		if (ws.readyState === ws.OPEN){
@@ -88,24 +77,30 @@ wss.on('connection', function(ws) {
 
 	ws.send(JSON.stringify(setInit(newPlayer)));
 	wss.broadcast(JSON.stringify(setOther(newPlayer)));
+
 	for (t = 0; t<stage.players.length-1; t ++){
-		ws.send(JSON.stringify(setOther(stage.players[t].toString())));
+		let b = stage.players[t];
+		if (b != null){
+			ws.send(JSON.stringify(setOther(b.toString())));
+		}
 	}
 	ws.on('message', function(message) {
 		const msg = JSON.parse(message);
-		if (msg.type == "close"){
+		// if the player dies
+		if (msg.type == "close" && stage.getPlayer(msg.id) != null){
 			ws.close();
 			stage.removeActor(stage.getPlayer(msg.id));
 			stage.removePlayer(msg.id);
 		} else {
-			if (msg.type == 'player'){
-				if(msg.msg == 'move' && stage.getPlayer(msg.id) != null){
+			// any action made by a player
+			if (msg.type == 'player' && stage.getPlayer(msg.id) != null){
+				if(msg.msg == 'move'){
 					let player = stage.getPlayer(msg.id);
 					player.setDirection(msg.x, msg.y);
-				} if (msg.fire == true && stage.getPlayer(msg.id) != null){
+				} if (msg.fire == true){
 					stage.getPlayer(msg.id).setTurret(msg.x, msg.y);
 					stage.getPlayer(msg.id).setFire(msg.fire);
-				} if (msg.pickup == true && stage.getPlayer(msg.id) != null){
+				} if (msg.pickup == true ){
 					stage.getPlayer(msg.id).setPickup(msg.pickup);
 				}
 			}
@@ -114,6 +109,7 @@ wss.on('connection', function(ws) {
 
 });
 
+// update all the clients of any changes made to the model periodically
 function syncChanges(){
 	interval=null;
 	interval=setInterval(function(){ 

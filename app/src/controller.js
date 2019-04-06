@@ -1,8 +1,6 @@
 import jQuery from 'jquery';
 import Stage from './render';
-//const Stage = require('./model.js');
 import {api_login, api_register, api_profile, api_profile_load} from './rest.js';
-//const Stage = require('./model.js');
 window.jQuery = jQuery;
 const $ = window.$;
 var stage;
@@ -146,7 +144,6 @@ function activateListeners(){
 				update(requestPickup());
 			}
 			window.ondevicemotion = function(event) {
-
 				if (agx >= Math.round(event.accelerationIncludingGravity.x)+4){
 					shake = true;
 				}
@@ -257,8 +254,6 @@ const getProfileFromFormFunc = function getProfileFromForm(formId, $){
 	};
 	$("input[value='"+data.skill+"']").prop('checked',true);
 	return data;
-	
-
 }
 
 export function gui_register(){
@@ -307,11 +302,6 @@ const myFunction = function putDataIntoProfileForm(data){
 		$(formId+" [id=user]").html(data.user);
 		$(formId+" [id=password]").val(data.password);
 		$(formId+" [id=confirmpassword]").val(data.password);
-		//$(formId+" [id=changeSkill]").attr("value",data.skill);
-		//$(formId+" [id=changeSkill]").attr("title",data.skill);
-		//$(formId+" [id=skillRadio]").attr("form",data.skill);
-		//$("input[value='intermediate']").prop( "checked", true );
-		//$(formId+ "[value=intermediate]").prop( "checked", true );
 		$("input[value='"+data.skill+"']").prop('checked',true);
 		$(formId+" [data-name=year]").val(data.year);
 		$(formId+" [data-name=month]").val(data.month);
@@ -339,8 +329,4 @@ export function gui_profile_load(){
 	api_profile_load(f, credentials);
 }
 
-/*// This is executed when the document is ready (the DOM for this document is loaded)
-$(function(){
-        showUI("#ui_login");
-});*/
 

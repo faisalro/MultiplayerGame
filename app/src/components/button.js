@@ -34,7 +34,7 @@ class ViewButton extends Component {
 	  return (
 	      <Button variant="contained" color="primary" onClick={this.props.clickHandler} className={classNames(this.props.classes.button)} >
 	        {this.props.value}
-	        <Icon className={this.props.classes.rightIcon}>{this.props.type}</Icon>
+	        <Icon className={this.props.classes.rightIcon}></Icon>
 	      </Button>
 	  );
 	}
