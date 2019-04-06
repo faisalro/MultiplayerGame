@@ -146,6 +146,7 @@ class Stage {
 	
 	getActorbyId(id, type){
 		for(var i=0;i<this.actors.length;i++){
+			console.log(this.actors[i].id, id);
 			if(this.actors[i].id == id){
 				return this.actors[i];
 			}

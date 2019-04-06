@@ -92,6 +92,15 @@ class Stage {
 		return null;
 	}
 
+	removePlayer(id){
+		for(var i=0;i<this.players.length;i++){
+			if(this.players[i].id == id){
+				this.players.splice(i,1);
+			}
+		}
+		return null;
+	}
+
 	getBullet(id){
 		for(var i=0;i<this.bullets.length;i++){
 			if(id == 0 || this.bullets[i].id == id){

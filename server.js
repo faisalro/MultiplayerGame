@@ -43,6 +43,7 @@ function updateSocketMap(ws, id){
 
 };
 
+
 function setInit(map){
 	var temp = Object.assign({}, map);
 	temp.msg = "init";
@@ -68,7 +69,9 @@ wss.on('close', function() {
 
 wss.broadcast = function(message){
 	for(let ws of this.clients){ 
-		ws.send(message);
+		if (ws.readyState === ws.OPEN){
+			ws.send(message);
+		}
 	}
 }
 
@@ -92,15 +95,17 @@ wss.on('connection', function(ws) {
 		const msg = JSON.parse(message);
 		if (msg.type == "close"){
 			ws.close();
+			stage.removeActor(stage.getPlayer(msg.id));
+			stage.removePlayer(msg.id);
 		} else {
 			if (msg.type == 'player'){
-				if(msg.msg == 'move'){
+				if(msg.msg == 'move' && stage.getPlayer(msg.id) != null){
 					let player = stage.getPlayer(msg.id);
 					player.setDirection(msg.x, msg.y);
-				} if (msg.fire == true){
+				} if (msg.fire == true && stage.getPlayer(msg.id) != null){
 					stage.getPlayer(msg.id).setTurret(msg.x, msg.y);
 					stage.getPlayer(msg.id).setFire(msg.fire);
-				} if (msg.pickup == true){
+				} if (msg.pickup == true && stage.getPlayer(msg.id) != null){
 					stage.getPlayer(msg.id).setPickup(msg.pickup);
 				}
 			}
