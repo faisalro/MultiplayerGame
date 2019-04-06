@@ -1,0 +1,6 @@
+Feature 1:
+    Touch controls for the game
+
+Feature 2:
+    In order to pick up ammo one must come near a crate and tilt the device (landscape orientation)
+    so that its flat and then bring it back up enough to pick up ammo.

@@ -146,7 +146,6 @@ class Stage {
 	
 	getActorbyId(id, type){
 		for(var i=0;i<this.actors.length;i++){
-			console.log(this.actors[i].id, id);
 			if(this.actors[i].id == id){
 				return this.actors[i];
 			}
@@ -232,7 +231,6 @@ class Tank extends Actor {
 		context.fill();   
 
 		var turretPos = this.getTurretPosition().toInt();
-		// console.log(turretPos);
 		context.beginPath(); 
 		context.arc(turretPos.x, turretPos.y, this.radius/2, 0, 2 * Math.PI, false); 
 		context.fill();   

@@ -15,6 +15,7 @@ var gui_state = {
 	password : ""
 };
 var shake = false;
+var agx =0;
 
 
 const soc =function getSocket() {
@@ -99,16 +100,11 @@ function getMousePos(canvas, evt) {
 }
 
 export function setupGame(){
-	//const Stage = require('./model.js');
-	//console.log("stage set");
-	// Instantiate User:
 	canvas=document.getElementById('stage');
 	soc();	
-
 }
 
 function update(msg){
-	console.log(msg);
 	send(msg);
 }
 
@@ -149,35 +145,26 @@ function activateListeners(){
 			} else if(key=="e"){
 				update(requestPickup());
 			}
-			if (window.DeviceOrientationEvent) {
-				var frontToBack = event.beta;
-				window.addEventListener("deviceorientation", function(event) {
-						// alpha: rotation around z-axis
-						var rotateDegrees = event.alpha;
-						// gamma: left to right
-						var leftToRight = event.gamma;
-						// beta: front back motion
-						if (frontToBack <= event.beta-5){
-							if (stage == true){
-								update(requestPickup());
-								shake = false;
-							} 
-						}
-						if (frontToBack >= event.beta-5){
-							shake = true;
-						}
-			}, true);
+			window.ondevicemotion = function(event) {
+
+				if (agx >= Math.round(event.accelerationIncludingGravity.x)+4){
+					shake = true;
+				}
+				if (agx <= Math.round(event.accelerationIncludingGravity.x)-4){
+					if (shake == true){
+						update(requestPickup());
+						shake = false;
+					}
+				}
 		}
 		});
 		//report the mouse position on click
 		canvas.addEventListener("mousemove", function (event) {
 					var mousePos = getMousePos(canvas, event);
-					// console.log(mousePos.x + ',' + mousePos.y);
 			stage.mouseMove(mousePos.x, mousePos.y);
 		}, false);
 		canvas.addEventListener("click", function (event) {
 					var mousePos = getMousePos(canvas, event);
-					// console.log(mousePos.x + ',' + mousePos.y);
 			update(requestFire());
 		}, false);
 }
@@ -280,9 +267,7 @@ export function gui_register(){
 		clearErrors("#ui_register");
 		var formId = "#ui_register";
 		var data = getProfileFromFormFunc("#ui_register", $);
-		//console.log("cont");
 		var p = $(formId+" [id=changeSkill]").attr("title");
-		//console.log(p);
 		var f = function(response, success){
 			if(success){
 			} else {
@@ -301,9 +286,6 @@ export function gui_profile(){
 
 		clearErrors("#ui_profile");
 		var data = getProfileFromFormFunc("#ui_profile", $);
-		//console.log("kjhkbk");
-		//var p = $(formId+" [id=changeSkill]").attr("title");
-		//console.log(p);
 		var f = function(response, success){
 			if(success){
 				gui_state.password = data.password; // in case password changed
@@ -320,10 +302,6 @@ export function gui_profile(){
 const myFunction = function putDataIntoProfileForm(data){
 	(function ($) {
 		$(document).ready(function(){
-			//console.log("here");
-			//var p = $("input[value='"+data.skill+"']").prop('checked');
-			//console.log(data.skill);
-		//console.log(p);
 
 		var formId="#ui_profile";
 		$(formId+" [id=user]").html(data.user);
@@ -341,11 +319,6 @@ const myFunction = function putDataIntoProfileForm(data){
 		$(formId+" [data-name=playmorning]").attr('checked', data.playmorning==1);
 		$(formId+" [data-name=playafternoon]").attr('checked', data.playafternoon==1);
 		$(formId+" [data-name=playevening]").attr('checked', data.playevening==1);
-
-		//p = $("input[value='"+data.skill+"']").prop('checked');
-		//console.log("koo");
-		//console.log(p);
-
 
 	  });
 	})(jQuery);
