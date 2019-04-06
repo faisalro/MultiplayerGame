@@ -1,5 +1,5 @@
-//var port = 8000;
-var port = 10060;
+var port = 8000;
+//var port = 10060;
 var express = require('express');
 var app = express();
 // app.disable('etag');
@@ -42,12 +42,15 @@ app.post('/api/login', function (req, res) {
 	}
 	if(isEmptyObject(result["error"])){
 		let sql = 'SELECT * FROM user WHERE user=? and password=?;';
-		db.get(sql, [user, password], function (err, row){
+		let d = req.body;
+		let params = [d.user, d.password, d.skill, d.year, d.month, d.day, d.playmorning, d.playafternoon, d.playevening];
+		db.get(sql, params, function (err, row){
   			if (err) {
 				res.status(500); 
     				result["error"]["db"] = err.message;
   			} else if (row) {
 				res.status(200);
+				result.data = row;
 				result.success = true;
 			} else {
 				res.status(401);
@@ -84,7 +87,12 @@ function validateUser(data){
 		result["confirmpassword"]="passwords do not match ";
 	}
 	if(!skill || -1==["beginner","intermediate","advanced"].indexOf(skill)){
-		result["skill"]="invalid skill";
+		if(!skill){
+			result["skill"]=data;
+		}else{
+			result["skill"]="njkbilb skill";
+		}
+		
 	}
 	if(!year || !/^\d{4}$/.test(year)){
 		result["year"]="invalid year";

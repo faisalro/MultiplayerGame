@@ -28,21 +28,21 @@ class Stage {
 		// Some balls
 		for(let i=0;i<numBalls;i++){
 			let s = this.randomState();
-			var b = new Ball(this, s.position, s.velocity, s.colour, s.radius);
+			b = new Ball(this, s.position, s.velocity, s.colour, s.radius);
 			this.addActor(b);
 		}
 
 		// Lots of boxes
 		for(let i=0;i<numBoxes;i++){
 			let s = this.randomState();
-			var b = new Box(this, s.position, s.colour,40);
+			b = new Box(this, s.position, s.colour,40);
 			this.addActor(b);
 		}
 
 		// Some opponents
 		for(let i=0;i<numOpponents;i++){
 			let s = this.randomState();
-			var b = new Opponent(this, s.position, s.velocity, s.colour, s.radius);
+			b = new Opponent(this, s.position, s.velocity, s.colour, s.radius);
 			this.addActor(b);
 		}
 		// controlls
@@ -77,8 +77,7 @@ class Stage {
 	}
 	/** Handle the mouse click on the stage in canvas coordinates **/
 	mouseClick(x,y){
-		var canvasPosition=new Pair(x,y);
-		var worldPosition=this.mapCanvasToWorld(canvasPosition);
+		//var canvasPosition=new Pair(x,y);
 		this.player.setFire(true);
 	}
 
@@ -98,7 +97,7 @@ class Stage {
 
 	removeActor(actor){
 		var index=this.actors.indexOf(actor);
-		if(index!=-1){
+		if(index!==-1){
 			this.actors.splice(index,1);
 		}
 	}
@@ -150,7 +149,7 @@ class Stage {
 	// return the first actor at coordinates (x,y) return null if there is no such actor
 	getActor(x, y){
 		for(var i=0;i<this.actors.length;i++){
-			if(this.actors[i].x==x && this.actors[i].y==y){
+			if(this.actors[i].x===x && this.actors[i].y===y){
 				return this.actors[i];
 			}
 		}
@@ -205,7 +204,7 @@ class Actor {
 		var closeActors = [];
  		for(var i in this.stage.actors){
 			var other = this.stage.actors[i];
-			if(other==this)continue;
+			if(other===this)continue;
 			var distanceBetween = this.position.vecSub(other.position).norm2();
 			if(distanceBetween<=(this.radius+other.radius+delta)){
 				closeActors.push(other);
@@ -251,9 +250,6 @@ class Actor {
 }
 
 class Ball extends Actor {
-	constructor(stage, position, velocity, colour, radius){
-		super(stage, position, velocity, colour, radius);
-	}
 	
 	headTo(position){
 		this.velocity = position.vecSub(this.position).normalize();
@@ -263,21 +259,6 @@ class Ball extends Actor {
 		return this.position.toString() + " " + this.velocity.toString();
 	}
 }
-/*class Controll extends Actor {
-	constructor(stage, position){
-		this.position = position;
-
-	}
-
-	draw(context){
-		context.fillStyle = "brown";
-   		// context.fillRect(this.x, this.y, this.radius,this.radius);
-		context.beginPath(); 
-		var intPosition = this.position.toInt();
-		context.arc(intPosition.x, intPosition.y, 10, 0, 2 * Math.PI, false); 
-		context.fill();   
-	}
-}*/
 
 class Box extends Actor {
 	constructor(stage, position, colour, radius){
@@ -312,7 +293,7 @@ class Tank extends Actor {
 	// Point the turret at crosshairs in world coordinates
 	pointTurret(crosshairs){
 		var delta = crosshairs.toInt().vecSub(this.position.toInt());
-		if(delta.x!=0 || delta.y !=0){
+		if(delta.x!==0 || delta.y !==0){
 			this.turretDirection = delta.normalize();
 		}
 	}
@@ -333,7 +314,7 @@ class Tank extends Actor {
 
 		if(this.pickup){
 			var closeActors = this.getCloseActors(5); // we may not be touching, but pick them up just the same
-			var closeActor = closeActors.find(actor => actor.constructor.name=="Box");
+			var closeActor = closeActors.find(actor => actor.constructor.name==="Box");
 			if(closeActor){
 				this.amunition=30;
 				this.health = 10;

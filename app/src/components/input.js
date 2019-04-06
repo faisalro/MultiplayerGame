@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
-import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 
 const styles = theme => ({
@@ -14,37 +13,61 @@ const styles = theme => ({
     marginLeft: theme.spacing.unit,
     marginRight: theme.spacing.unit,
     margin: 8,
+    width: "100%",
   },
   dense: {
     marginTop: 16,
   },
   menu: {
-    width: 200,
+    width: 400,
+  },
+  cssLabel: {
+    color : 'black  !important'
+  },
+
+  cssOutlinedInput: {
+    '&$cssFocused $notchedOutline': {
+      borderColor: `#6DD6E5 !important`,
+    }
+  },
+
+  cssFocused: {},
+
+  notchedOutline: {
+    borderWidth: '1px',
+    borderColor: '#FE6B8B !important'
   },
 });
 
 class ViewInput extends Component {
-	constructor(props) {
-	  super(props);
-	}
 
 	render() {
 	  const { classes } = this.props;
-	  //console.log(this.props.name);
 	  return (
-	  		<TextField
-		          id={this.props.name}
-		          label= {this.props.name}
-		          type = {this.props.type}
-		          placeholder={this.props.placeholder}
-		          //helperText="Full width!"
-		          margin="normal"
-		          variant="outlined"
-		          InputLabelProps={{
-		            shrink: true,
-		          }}
-		          className={classNames(this.props.classes.textField)}
-		        />
+  		<TextField
+          id={this.props.name}
+          label= {this.props.name}
+          type = {this.props.type}
+          placeholder={this.props.placeholder}
+          //helperText="Full width!"
+          margin="normal"
+          variant="outlined"
+          InputLabelProps={{
+            classes: {
+              root: classes.cssLabel,
+              focused: classes.cssFocused,
+            },
+            shrink: true,
+          }}
+          InputProps={{
+            classes: {
+              root: classes.cssOutlinedInput,
+              focused: classes.cssFocused,
+              notchedOutline: classes.notchedOutline,
+            },
+          }}
+          className={classNames(classes.textField)}
+        />
 	  );
 	}
 }

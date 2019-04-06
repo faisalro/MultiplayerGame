@@ -1,8 +1,6 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React  from 'react';
 import './App.css';
-import {startGame, pauseGame, gui_login, gui_register, gui_profile, gui_profile_load, setupGame, moveUp, moveRight, moveDown, moveLeft} from './controller.js';
-import ViewButton from './components/button.js';
+import {startGame, pauseGame, gui_login, gui_register, gui_profile, gui_profile_load, handleStart, handleMove, handleEnd} from './controller.js';
 import GameView from './components/game.js';
 import InstructionView from './components/instruction.js';
 import LoginView from './components/login.js';
@@ -41,9 +39,6 @@ class App extends React.Component {
     gui_login();
     this.setState({loggedIn: true, pageLogIn: false, pageRegister: false, pageGame: true, pageProfile: false, pageInstruction: false, pageStats: false});
 
-    
-
-
   }
   registerButtonClickHandler(e){
     if(this.state.pageLogIn){
@@ -72,7 +67,7 @@ class App extends React.Component {
   profileButtonClickHandler(e){
     this.setState({pageLogIn: false, pageRegister: false, pageGame: false, pageProfile: true, pageInstruction: false, pageStats: false});
     pauseGame();
-    //gui_profile_load();
+    gui_profile_load();
 
   }
   instructionButtonClickHandler(e){
@@ -93,19 +88,45 @@ class App extends React.Component {
   }
   controlButtonClickHandler(e){
 
-    if(e.target.id =="keyboard_key_up"){
-      moveUp();
 
-    }else if(e.target.id =="keyboard_key_down"){
-      moveDown();
+    var up=document.getElementById('keyboard_key_up');
+    var left=document.getElementById('keyboard_key_left');
+    var down=document.getElementById('keyboard_key_down');
+    var right=document.getElementById('keyboard_key_right');
+
+    if(e.target.id ==="keyboard_key_up"){
+
+      up.addEventListener("touchstart", handleStart, false);
+      up.addEventListener("touchmove", handleMove, false);
+      up.addEventListener("touchend", handleEnd, false);
+
+
+    }else if(e.target.id ==="keyboard_key_down"){
+
+      down.addEventListener("touchstart", handleStart, false);
+      down.addEventListener("touchmove", handleMove, false);
+      down.addEventListener("touchend", handleEnd, false);
+
+
       
-    }else if(e.target.id =="keyboard_key_right"){
-      moveRight();
+    }else if(e.target.id ==="keyboard_key_right"){
+
+      right.addEventListener("touchstart", handleStart, false);
+      right.addEventListener("touchmove", handleMove, false);
+      right.addEventListener("touchend", handleEnd, false);
+
+
       
-    }else if(e.target.id =="keyboard_key_left"){
-      moveLeft();
+    }else if(e.target.id ==="keyboard_key_left"){
+
+      left.addEventListener("touchstart", handleStart, false);
+      left.addEventListener("touchmove", handleMove, false);
+      left.addEventListener("touchend", handleEnd, false);
+
+
       
     }
+
 
 
   }

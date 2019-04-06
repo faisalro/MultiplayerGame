@@ -3,11 +3,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
-import DeleteIcon from '@material-ui/icons/Delete';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import KeyboardVoiceIcon from '@material-ui/icons/KeyboardVoice';
 import Icon from '@material-ui/core/Icon';
-import SaveIcon from '@material-ui/icons/Save';
 
 const styles = theme => ({
   button: {
@@ -25,16 +21,13 @@ const styles = theme => ({
 });
 
 class ViewButton extends Component {
-	constructor(props) {
-	  super(props);
-	}
 
 	render() {
 	  const { classes } = this.props;
 	  return (
-	      <Button variant="contained" color="primary" onClick={this.props.clickHandler} className={classNames(this.props.classes.button)} >
+	      <Button variant="contained" color="primary" onClick={this.props.clickHandler} className={classNames(classes.button)} >
 	        {this.props.value}
-	        <Icon className={this.props.classes.rightIcon}>{this.props.type}</Icon>
+	        <Icon className={classes.rightIcon}>{this.props.type}</Icon>
 	      </Button>
 	  );
 	}

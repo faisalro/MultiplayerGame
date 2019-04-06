@@ -1,3 +1,20 @@
+@import url('https://fonts.googleapis.com/css?family=Lato');
+
+
+body, html{
+  height: 100%;
+  font-family: 'Lato', sans-serif;
+}
+h1{
+  text-align: center;
+  color: #FE6B8B;
+  font-weight: bold;
+  font-size: 42px;
+
+}
+input:focus {
+    outline:0 !important;
+}
 .App {
   text-align: center;
 }
@@ -39,11 +56,27 @@ body {
   margin: 0;
   padding: 0;
 }
+#ui_login{
+  padding-top: 10%;
+
+}
+#ui_instructions{
+  padding-top: 5%;
+  line-height: 2em;
+  font-size: 2em;
+
+
+}
+
+
 
 #wrapper {
   display: flex;
   height: 100vh;
   justify-content: center;
+}
+.center{
+  margin: 10px 30% auto;
 }
 
 #controls {
@@ -78,3 +111,140 @@ body {
 #keyboard_key_right {
   grid-column-start: 3;
 }
+div#radio{
+  display: block;
+  position: relative;
+  height: auto;
+  width: 500px;
+}
+
+ul{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+
+ul li{
+  color: #AAAAAA;
+  display: block;
+  position: relative;
+  float: left;
+  width: 100%;
+}
+
+ul li input[type=radio]{
+  position: absolute;
+  visibility: hidden;
+}
+ul li input[type=checkbox]{
+  position: absolute;
+  visibility: hidden;
+}
+
+label{
+  color: #AAAAAA;
+  display: block;
+  position: relative;
+  font-weight: 300;
+  font-size: 1.35em;
+  padding: 5% 5% 5% 15%;
+  height: 10px;
+  z-index: 9;
+  cursor: pointer;
+  -webkit-transition: all 0.25s linear;
+}
+label.heading{
+  width: 100%;
+  margin-left: 25%;
+}
+
+ul li:hover label{
+  color: #6DD6E5;
+}
+
+ul li .check{
+  display: block;
+  position: absolute;
+  border: 5px solid #AAAAAA;
+  border-radius: 100%;
+  height: 25px;
+  width: 25px;
+  top: 20px;
+  z-index: 5;
+  transition: border .25s linear;
+  -webkit-transition: border .25s linear;
+}
+
+ul li:hover .check {
+  border: 5px solid #6DD6E5;
+}
+
+ul li .check::before {
+  display: block;
+  position: absolute;
+  content: '';
+  border-radius: 100%;
+  height: 15px;
+  width: 15px;
+  top: 5px;
+  left: 5px;
+  margin: auto;
+  transition: background 0.25s linear;
+  -webkit-transition: background 0.25s linear;
+}
+
+input[type=radio]:checked ~ .check {
+  border: 5px solid #FE6B8B;
+}
+
+input[type=radio]:checked ~ .check::before{
+  background: #FE6B8B;
+}
+
+input[type=radio]:checked ~ label{
+  color: #FE6B8B;
+}
+
+
+input[type=checkbox]:checked ~ .check {
+  border: 5px solid #FE6B8B;
+}
+
+input[type=checkbox]:checked ~ .check::before{
+  background: #FE6B8B;
+}
+
+input[type=checkbox]:checked ~ label{
+  color: #FE6B8B;
+}
+
+select{
+  height: 48px;
+  width: 150px;
+  border-radius:4px;
+  color:#555;
+  border:1px solid #ccc;
+}
+
+.number-wrapper {
+    position: relative;
+}
+
+input[type="number"]{
+  height:34px;
+  padding:6px 12px;
+  font-size:14px;
+  line-height:1.428571429;
+  color:#555;
+  vertical-align:middle;
+  background-color:#fff;
+  border:1px solid #ccc;
+  border-radius:4px;
+  -webkit-box-shadow:inset 0 1px 1px rgba(0,0,0,0.075);
+  box-shadow:inset 0 1px 1px rgba(0,0,0,0.075);
+  -webkit-transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+  transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s
+}
+
+

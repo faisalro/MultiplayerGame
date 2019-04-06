@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 class InstructionView extends React.Component {
   constructor(props) {
     super(props);
@@ -8,9 +8,10 @@ class InstructionView extends React.Component {
   }
   render(props){
     return (
-      <div style={{border:"1px solid black"}} > 
-        <div id="ui_instructions">
-          <div>
+      <div > 
+        <div id="ui_instructions" className="center" >
+        <h1>Instructions</h1>
+          <div >
             <ul>
             <li> Move with <code>wasd</code></li>
             <li> Boxes restore amunition and health, move next to them and press e</li>

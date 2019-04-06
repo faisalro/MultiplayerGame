@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import ViewButton from './button';
 class NavView extends React.Component {
   constructor(props) {
@@ -11,7 +11,7 @@ class NavView extends React.Component {
     return (
       <div style={{border:"1px solid black"}} > 
         <div>
-          Fortnight
+          <h1>Fortnight</h1>
           <div id="ui_nav">
             <ViewButton clickHandler={this.props.playHandler} value={"Play"} type={"videogame_asset"} />
             <ViewButton clickHandler={this.props.instructionHandler} value={"Instructions"} type={"help_outline"}/>
