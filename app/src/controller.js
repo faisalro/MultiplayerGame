@@ -153,7 +153,7 @@ function activateListeners(){
 						shake = false;
 					}
 				}
-		}
+			}
 		});
 		//report the mouse position on click
 		canvas.addEventListener("mousemove", function (event) {
@@ -181,9 +181,7 @@ export function pauseGame(){
 function clearErrors(ui){
 	(function ($) {
 		$(document).ready(function(){
-
 		$(ui+" .form-errors").html("");
-
 	  });
 	})(jQuery);
 }
