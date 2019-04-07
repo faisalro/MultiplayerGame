@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ViewButton from './button';
 import ViewInput from './input';
@@ -19,7 +20,6 @@ class ProfileView extends React.Component {
     this.setState({
       selectedSkill: changeEvent.target.value
     });
-
   }
   handleTimeChange(changeEvent){
 
@@ -47,8 +47,6 @@ class ProfileView extends React.Component {
     gui_profile_load();
   }
   render(props){
-
-
     return (
       <div > 
         <div id="ui_profile">

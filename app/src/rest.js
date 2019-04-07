@@ -17,13 +17,11 @@ export function api_login(user, password, f){
 			data: JSON.stringify({ "user": user , "password": password })
 		}).done(function(data, text_status, jqXHR){
 			f(data, true);
-			/** console.log(JSON.stringify(data)); console.log(text_status); console.log(jqXHR.status); **/
 		}).fail(function(err){
 			let response = {};
 			if("responseJSON" in err)response = err.responseJSON;
 			else response = { error: { "Server Error" : err.status } };
 			f(response, false);
-			/** console.log(err.status); console.log(JSON.stringify(err.responseJSON)); **/
 		});
 	})(jQuery);
 	
@@ -45,7 +43,6 @@ export function api_register(data, f){
 			data: JSON.stringify(data)
 		}).done(function(data, text_status, jqXHR){
 			f(data, true);
-			/** console.log(JSON.stringify(data)); console.log(text_status); console.log(jqXHR.status); **/
 		}).fail(function(err){
 			let response = {};
 			if("responseJSON" in err)response = err.responseJSON;
@@ -54,7 +51,6 @@ export function api_register(data, f){
 				response.error.db="user already taken";
 			}
 			f(response, false);
-			/** console.log(err.status); console.log(JSON.stringify(err.responseJSON)); **/
 		});
 
 	  });
@@ -77,13 +73,11 @@ export function api_profile(data, f, credentials){
 			data: JSON.stringify(data)
 		}).done(function(data, text_status, jqXHR){
 			f(data, true);
-			/** console.log(JSON.stringify(data)); console.log(text_status); console.log(jqXHR.status); **/
 		}).fail(function(err){
 			let response = {};
 			if("responseJSON" in err)response = err.responseJSON;
 			else response = { error: { "Server Error" : err.status } };
 			f(response, false);
-			/** console.log(err.status); console.log(JSON.stringify(err.responseJSON)); **/
 		});
 
 	  });
@@ -109,7 +103,7 @@ export function api_profile_load(f, credentials){
 			if("responseJSON" in err)response = err.responseJSON;
 			else response = { error: { "Server Error" : err.status } };
 			f(response, false);
-			/** console.log(err.status); console.log(JSON.stringify(err.responseJSON)); **/
+
 		});
 
 	})(jQuery);

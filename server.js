@@ -1,19 +1,15 @@
-var port = 8000;
-//var port = 10060;
-var express = require('express');
-var app = express();
-// app.disable('etag');
 
-// http://www.sqlitetutorial.net/sqlite-nodejs/connect/
+var port = 10060;
+var express = require('express');
+var model = require('./model');
+var app = express();
+const webPort = port + 2;
 const sqlite3 = require('sqlite3').verbose();
 
-// https://scotch.io/tutorials/use-expressjs-to-get-url-and-post-parameters
 var bodyParser = require('body-parser');
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
-// http://www.sqlitetutorial.net/sqlite-nodejs/connect/
-// https://github.com/mapbox/node-sqlite3/wiki/API
 // will create the db if it does not exist
 var db = new sqlite3.Database('db/database.db', (err) => {
 	if (err) {
@@ -22,8 +18,123 @@ var db = new sqlite3.Database('db/database.db', (err) => {
 	console.log('Connected to the database.');
 });
 
-// https://expressjs.com/en/starter/static-files.html
 app.use(express.static('static-content')); 
+
+var WebSocketServer = require('ws').Server
+   ,wss = new WebSocketServer({port: webPort});
+
+var socketMap = [];
+var interval = null;
+
+var stage = new model();
+
+function updateSocketMap(ws, id){
+	socketMap.push({
+		soc: ws,
+		player: id
+	});
+};
+
+function setInit(map){
+	var temp = Object.assign({}, map);
+	temp.msg = "init";
+	return temp;
+}
+
+function setOther(map){
+	var temp = Object.assign({}, map);
+	temp.msg = "other";
+	return temp;
+}
+
+function setMove(map){
+	var temp = Object.assign({}, map);
+	temp.msg = "move";
+	return temp;
+}
+
+wss.on('close', function() {
+    console.log('disconnected');
+});
+
+wss.broadcast = function(message){
+	for(let ws of this.clients){ 
+		if (ws.readyState === ws.OPEN){
+			ws.send(message);
+		}
+	}
+}
+
+wss.on('connection', function(ws) {
+	var i;
+	var t;
+	ws.send(JSON.stringify({width: stage.width, height: stage.height}));
+	syncChanges();
+	for(i=0;i<stage.obstacles.length;i++){
+		ws.send(JSON.stringify(stage.obstacles[i].toString()));
+	}
+	var newPlayer = stage.initPlayer();
+	updateSocketMap(ws, stage.actorId);
+
+	ws.send(JSON.stringify(setInit(newPlayer)));
+	wss.broadcast(JSON.stringify(setOther(newPlayer)));
+
+	for (t = 0; t<stage.players.length-1; t ++){
+		let b = stage.players[t];
+		if (b != null){
+			ws.send(JSON.stringify(setOther(b.toString())));
+		}
+	}
+	ws.on('message', function(message) {
+		const msg = JSON.parse(message);
+		// if the player dies
+		if (msg.type == "close" && stage.getPlayer(msg.id) != null){
+			ws.close();
+			stage.removeActor(stage.getPlayer(msg.id));
+			stage.removePlayer(msg.id);
+		} else {
+			// any action made by a player
+			if (msg.type == 'player' && stage.getPlayer(msg.id) != null){
+				if(msg.msg == 'move'){
+					let player = stage.getPlayer(msg.id);
+					player.setDirection(msg.x, msg.y);
+				} if (msg.fire == true){
+					stage.getPlayer(msg.id).setTurret(msg.x, msg.y);
+					stage.getPlayer(msg.id).setFire(msg.fire);
+				} if (msg.pickup == true ){
+					stage.getPlayer(msg.id).setPickup(msg.pickup);
+				}
+			}
+		}
+	});
+
+});
+
+// update all the clients of any changes made to the model periodically
+function syncChanges(){
+	interval=null;
+	interval=setInterval(function(){ 
+		stage.step();
+		stage.actors = stage.actors.filter(actor => !actor.isZombie);
+
+		for (let i = 0; i < stage.players.length; i ++){
+			let b = stage.players[i];
+			if (b != null){
+				wss.broadcast(JSON.stringify(setMove(b.toString())));
+			}
+		}	
+		for (let i = 0; i < stage.bullets.length; i ++){
+			let b = stage.bullets[i];
+			if (b != null){
+				wss.broadcast(JSON.stringify(setMove(b.toString())));
+			}
+		}
+		stage.players = stage.players.filter(actor => !actor.isZombie);
+		stage.bullets = stage.bullets.filter(actor => !actor.isZombie);
+		
+	},20);
+}
+	
 
 function isEmptyObject(obj){
 	return Object.keys(obj).length === 0;
@@ -176,9 +287,7 @@ app.put('/api/user/:user', function (req, res) {
 });
 
 app.get('/api/user/:user', function (req, res) {
-	// console.log(JSON.stringify(req));
-	// var user = req.body.user;
-	// var password = req.body.password;
+
 
 	var user = req.params.user;
 	var password = req.query.password;

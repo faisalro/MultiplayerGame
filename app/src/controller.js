@@ -1,7 +1,6 @@
 import jQuery from 'jquery';
-import Stage from './model';
+import Stage from './render';
 import {api_login, api_register, api_profile, api_profile_load} from './rest.js';
-
 window.jQuery = jQuery;
 var stage;
 var interval=null;
@@ -10,12 +9,87 @@ var up = false;
 var left = false;
 var down = false;
 var right = false;
-export var gui_state = {
+var gui_state = {
 	isLoggedIn : false,
 	user     : "",
 	password : "",
-	skill: ""
+
 };
+var shake = false;
+var agx =0;
+
+
+const soc =function getSocket() {
+
+  if (getSocket.server && getSocket.server.readyState < 2) {
+    return Promise.resolve(getSocket.server);
+  }
+
+  return new Promise(function (resolve, reject) {
+
+    getSocket.server = new WebSocket("ws://localhost:10062");
+
+    getSocket.server.onopen = function () {
+      console.log("Connected to Socket");
+      resolve(getSocket.server);
+    };
+
+    getSocket.server.onerror = function (err) {
+      console.error("socket connection error : ", err);
+      reject(err);
+		};
+		getSocket.server.onmessage = function (event) {
+			var msg = JSON.parse(event.data);
+			if (stage==null){
+				stage=new Stage(canvas, msg.width, msg.height);
+			}
+			if (msg.isZombie == true){
+				if (msg.id == stage.player.id && msg.type == "player"){
+					alert("Game Over");
+					update({type: "close"});
+					return ;
+				}
+				stage.getActorbyId(msg.id).makeZombie();
+			}
+			if (msg.type == "player"){
+				if (msg.msg == "init"){
+					if (stage.player == null){
+						stage.initPlayer(msg);
+						startGame();
+						activateListeners();
+					} 
+				}
+				
+				else if(msg.msg == "move" && stage.player.id == msg.id) {
+					stage.player.updatePos(msg.x, msg.y);
+				}
+				else if (msg.msg == "other" && msg.id != stage.player.id){
+					stage.initOpponent(msg);
+				} 
+				else{
+					stage.updateOpponents(msg.x, msg.y, msg.id);
+				}
+			} 
+			else if (msg.type == "obstacle"){
+				stage.initObstacle(msg);
+			}
+			else if (msg.type == "bullet"){
+				if (stage.getBullet(msg.id) == null){
+					stage.initShot(msg);
+				} else {
+					stage.updateBullet(msg.x, msg.y , msg.id);
+				}
+				
+			}
+			
+		}
+  });
+}
+
+function send(data){
+	soc.server.send(JSON.stringify(data));
+}
+/*  */
 
 //Get Mouse Position
 function getMousePos(canvas, evt) {
@@ -26,51 +100,10 @@ function getMousePos(canvas, evt) {
     };
 }
 
-const setupFunction = function setupGame(){
-	// Instantiate User:
-	canvas=document.getElementById('stage');
-	stage=new Stage(canvas);
-
-
-	
-	
-
-	// https://javascript.info/keyboard-events
-	document.addEventListener('keydown', function(event){
-		var key = event.key;
-		var moveMap = { 
-			'a': { "dx": -1, "dy": 0},
-			's': { "dx": 0, "dy": 1},
-			'd': { "dx": 1, "dy": 0},
-			'w': { "dx": 0, "dy": -1}
-		};
-		if(key in moveMap){
-			stage.player.setDirection(moveMap[key].dx, moveMap[key].dy);
-		} else if(key==="e"){
-			stage.player.setPickup(true);
-		}
-	});
-	//report the mouse position on click
-	canvas.addEventListener("mousemove", function (event) {
-    		var mousePos = getMousePos(canvas, event);
-    		// console.log(mousePos.x + ',' + mousePos.y);
-		stage.mouseMove(mousePos.x, mousePos.y);
-	}, false);
-	canvas.addEventListener("click", function (event) {
-    		var mousePos = getMousePos(canvas, event);
-    		// console.log(mousePos.x + ',' + mousePos.y);
-		stage.mouseClick(mousePos.x, mousePos.y);
-
-
-	}, false);
-	startGame();
-}
-
 export function handleStart(evt) {
 	//evt.preventDefault();
 	var path = evt.path;
 	var button_name = path[0].id
-	console.log("touchstart.");
 
 	if(button_name ==="keyboard_key_up"){
 	  up = true;
@@ -85,13 +118,23 @@ export function handleStart(evt) {
 	  left = true;
 	  
 	}
+	else if(button_name ==="pickup"){
+	  update(requestPickup());
+	  
+	}
 	touchMove();
+	if(button_name ==="stage"){
+		var mousePos = getMousePos(canvas, evt.touches[0]);
+		stage.mouseMove(mousePos.x, mousePos.y);
+		update(requestFire());
+
+	  
+	}
 }
 export function handleMove(evt) {
 	//evt.preventDefault();
 	var path = evt.path;
 	var button_name = path[0].id
-	console.log("touchmove.");
 
 	if(button_name ==="keyboard_key_up"){
 	  up = true;
@@ -110,7 +153,6 @@ export function handleMove(evt) {
 }
 export function handleEnd(evt) {
 	evt.preventDefault();
-	console.log("touchend");
 	var path = evt.path;
 	var button_name = path[0].id
 	if(button_name ==="keyboard_key_up"){
@@ -130,24 +172,81 @@ export function handleEnd(evt) {
 function touchMove(){
 	//console.log("touchmove");
 	if(up){
-	  stage.player.setDirection(0, -1);
+	  update(requestMove(0, -1));
 
 	}
 	else if(down){
-	  stage.player.setDirection(0, 1);
+	  update(requestMove(0, 1));
 	  
 	}else if(right){
-	  stage.player.setDirection(1, 0);
+	  update(requestMove(1, 0));
 	  
 	}else if(left){
-	  stage.player.setDirection(-1, 0);
+	  update(requestMove(-1, 0));
 	  
 	}
 
 }
 
+export function setupGame(){
+	canvas=document.getElementById('stage');
+	soc();	
+}
+
+function update(msg){
+	send(msg);
+}
+
+function requestMove(x,y){
+	var temp = Object.assign({}, stage.player.toString());
+	temp.x = x;
+	temp.y = y;
+	temp.msg = "move";
+	return temp;
+}
+
+function requestFire(){
+	var temp = Object.assign({}, stage.player.toString());
+	temp.fire = true;
+	temp.x = stage.player.turretDirection.x;
+	temp.y = stage.player.turretDirection.y;
+	return temp;
+}
+
+function requestPickup(){
+	var temp = Object.assign({}, stage.player.toString());
+	temp.pickup = true;
+	return temp;
+}
+
+function activateListeners(){
+		// https://javascript.info/keyboard-events
+		document.addEventListener('keydown', function(event){
+			var key = event.key;
+			var moveMap = { 
+				'a': { "dx": -1, "dy": 0},
+				's': { "dx": 0, "dy": 1},
+				'd': { "dx": 1, "dy": 0},
+				'w': { "dx": 0, "dy": -1}
+			};
+			if(key in moveMap){
+				update(requestMove(moveMap[key].dx, moveMap[key].dy));
+			} else if(key=="e"){
+				update(requestPickup());
+			}
+		});
+		//report the mouse position on click
+		canvas.addEventListener("mousemove", function (event) {
+					var mousePos = getMousePos(canvas, event);
+			stage.mouseMove(mousePos.x, mousePos.y);
+		}, false);
+		canvas.addEventListener("click", function (event) {
+					var mousePos = getMousePos(canvas, event);
+			update(requestFire());
+		}, false);
+}
+
 export function startGame(){
-	
 	interval=null;
 	interval=setInterval(function(){ 
 		stage.animateDraw(); 
@@ -167,7 +266,6 @@ function clearErrors(ui){
 
 	  });
 	})(jQuery);
-	
 }
 
 function showErrors(ui,response){
@@ -202,9 +300,10 @@ export function gui_login(){
 				gui_state.isLoggedIn=true;
 				gui_state.user=user;
 				gui_state.password=password;
-				setupFunction();
-				
-
+				/*setupFunction();*/
+				// Instantiate User:
+				canvas=document.getElementById('stage');
+				setupGame();
 			} else {
 				gui_state.isLoggedIn=false;
 				gui_state.user="";
@@ -245,18 +344,14 @@ const getProfileFromFormFunc = function getProfileFromForm(formId, $){
 		playevening: checkboxSelected($(formId+" [data-name=playevening]:checked").val())
 	};
 	return data;
-	
-
 }
 
 export function gui_register(){
 	(function ($) {
 		clearErrors("#ui_register");
 		var data = getProfileFromFormFunc("#ui_register", $);
-
 		var f = function(response, success){
 			if(success){
-				//dataB = response.data;
 			} else {
 				showErrors("#ui_register",response);
 			}
@@ -274,7 +369,6 @@ export function gui_profile(){
 	(function ($) {
 		clearErrors("#ui_profile");
 		var data = getProfileFromFormFunc("#ui_profile", $);
-
 		var f = function(response, success){
 			if(success){
 				gui_state.password = data.password; // in case password changed

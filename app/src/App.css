@@ -52,10 +52,6 @@ input:focus {
   }
 }
 
-body {
-  margin: 0;
-  padding: 0;
-}
 #ui_login{
   padding-top: 10%;
 
@@ -91,6 +87,7 @@ body {
   padding: 0;
   width: 40px;
   height: 40px;
+  background-color: #6DD6E5;
 }
 
 .movements_control img {
@@ -246,5 +243,6 @@ input[type="number"]{
   -webkit-transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s;
   transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s
 }
-
-
+#pickup{
+  background-color: #FE6B8B;
+}

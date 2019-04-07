@@ -32,7 +32,6 @@ class App extends React.Component {
     this.controlButtonClickHandler = this.controlButtonClickHandler.bind(this);
 
     this.game = <GameView controlClickHandler={this.controlButtonClickHandler}/>;
-    this.profileView = <ProfileView updateHandler={this.updateButtonClickHandler}  />;
 
   }
   loginButtonClickHandler(e){
@@ -93,6 +92,8 @@ class App extends React.Component {
     var left=document.getElementById('keyboard_key_left');
     var down=document.getElementById('keyboard_key_down');
     var right=document.getElementById('keyboard_key_right');
+    var canvas=document.getElementById('stage');
+    var pick=document.getElementById('pickup');
 
     if(e.target.id ==="keyboard_key_up"){
 
@@ -100,32 +101,31 @@ class App extends React.Component {
       up.addEventListener("touchmove", handleMove, false);
       up.addEventListener("touchend", handleEnd, false);
 
-
     }else if(e.target.id ==="keyboard_key_down"){
 
       down.addEventListener("touchstart", handleStart, false);
       down.addEventListener("touchmove", handleMove, false);
       down.addEventListener("touchend", handleEnd, false);
-
-
-      
+    
     }else if(e.target.id ==="keyboard_key_right"){
 
       right.addEventListener("touchstart", handleStart, false);
       right.addEventListener("touchmove", handleMove, false);
       right.addEventListener("touchend", handleEnd, false);
-
-
-      
+    
     }else if(e.target.id ==="keyboard_key_left"){
 
       left.addEventListener("touchstart", handleStart, false);
       left.addEventListener("touchmove", handleMove, false);
       left.addEventListener("touchend", handleEnd, false);
-
-
       
+    }else if(e.target.id ==="pickup"){
+      canvas.addEventListener("touchstart", handleStart, false);
+      
+    }if(e.target.id ==="stage"){
+      pick.addEventListener("touchstart", handleStart, false);
     }
+
 
 
 
@@ -157,7 +157,7 @@ class App extends React.Component {
         view = null;
       }else if (this.state.pageProfile) {
 
-        view = this.profileView;
+        view = <ProfileView updateHandler={this.updateButtonClickHandler}  />;
       }else if (this.state.pageInstruction) {
 
         view = <InstructionView />;
