@@ -102,8 +102,9 @@ function getMousePos(canvas, evt) {
 
 export function handleStart(evt) {
 	//evt.preventDefault();
-	var path = evt.path;
-	var button_name = path[0].id
+	//console.log(evt);
+	//var path = evt.path;
+	var button_name = evt.srcElement.id;
 
 	if(button_name ==="keyboard_key_up"){
 	  up = true;
@@ -125,7 +126,7 @@ export function handleStart(evt) {
 	touchMove();
 	if(button_name ==="stage"){
 		var mousePos = getMousePos(canvas, evt.touches[0]);
-		stage.mouseMove(mousePos.x, mousePos.y);
+		//stage.mouseMove(mousePos.x, mousePos.y);
 		update(requestFire());
 
 	  
