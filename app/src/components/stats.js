@@ -1,5 +1,4 @@
-import React, { Component } from 'react';
-import ViewButton from './button';
+import React from 'react';
 class StatsView extends React.Component {
   constructor(props) {
     super(props);

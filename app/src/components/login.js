@@ -1,13 +1,12 @@
-import React, { Component } from 'react';
+import React from 'react';
 import ViewButton from './button';
 import ViewInput from './input';
 class LoginView extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+
   render(props){
     return (
-      <div style={{border:"1px solid black"}} id="ui_login"> 
+      <div id="ui_login" className="center"> 
+        <h1>Fortnight</h1>
         <div>
           <ViewInput name={"user"} placeholder={"User Name"} type={"text"}/>
         </div>

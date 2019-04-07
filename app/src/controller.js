@@ -2,15 +2,18 @@ import jQuery from 'jquery';
 import Stage from './render';
 import {api_login, api_register, api_profile, api_profile_load} from './rest.js';
 window.jQuery = jQuery;
-const $ = window.$;
 var stage;
-var view = null;
 var interval=null;
 var canvas=null;
+var up = false;
+var left = false;
+var down = false;
+var right = false;
 var gui_state = {
 	isLoggedIn : false,
 	user     : "",
-	password : ""
+	password : "",
+
 };
 var shake = false;
 var agx =0;
@@ -97,6 +100,85 @@ function getMousePos(canvas, evt) {
     };
 }
 
+export function handleStart(evt) {
+	var path = evt.target;
+	var button_name = path.id;
+
+	if(button_name ==="keyboard_key_up"){
+	  up = true;
+
+	}else if(button_name==="keyboard_key_down"){
+	  down = true;
+	  
+	}else if(button_name ==="keyboard_key_right"){
+	  right = true;
+	  
+	}else if(button_name ==="keyboard_key_left"){
+	  left = true;
+	  
+	}
+	else if(button_name ==="pickup"){
+	  update(requestPickup());
+	  
+	}
+	touchMove();
+	if(button_name ==="stage"){
+		getMousePos(canvas, evt.touches[0]);
+		update(requestFire());	  
+	}
+}
+export function handleMove(evt) {
+	var path = evt.path;
+	var button_name = path[0].id;
+
+	if(button_name ==="keyboard_key_up"){
+	  up = true;
+
+	}else if(button_name==="keyboard_key_down"){
+	  down = true;
+	  
+	}else if(button_name ==="keyboard_key_right"){
+	  right = true;
+	  
+	}else if(button_name ==="keyboard_key_left"){
+	  left = true;
+	  
+	}
+	touchMove();
+}
+export function handleEnd(evt) {
+	evt.preventDefault();
+	var path = evt.path;
+	var button_name = path[0].id
+	if(button_name ==="keyboard_key_up"){
+	  up = false;
+
+	}else if(button_name==="keyboard_key_down"){
+	  down = false;
+	  
+	}else if(button_name ==="keyboard_key_right"){
+	  right = false;
+	  
+	}else if(button_name ==="keyboard_key_left"){
+	  left = false;
+	  
+	}
+}
+function touchMove(){
+	if(up){
+	  update(requestMove(0, -1));
+	}
+	else if(down){
+	  update(requestMove(0, 1));
+	  
+	}else if(right){
+	  update(requestMove(1, 0));
+	  
+	}else if(left){
+	  update(requestMove(-1, 0));
+	}
+}
+
 export function setupGame(){
 	canvas=document.getElementById('stage');
 	soc();	
@@ -143,17 +225,6 @@ function activateListeners(){
 			} else if(key=="e"){
 				update(requestPickup());
 			}
-			window.ondevicemotion = function(event) {
-				if (agx >= Math.round(event.accelerationIncludingGravity.x)+4){
-					shake = true;
-				}
-				if (agx <= Math.round(event.accelerationIncludingGravity.x)-4){
-					if (shake == true){
-						update(requestPickup());
-						shake = false;
-					}
-				}
-			}
 		});
 		//report the mouse position on click
 		canvas.addEventListener("mousemove", function (event) {
@@ -164,17 +235,28 @@ function activateListeners(){
 					var mousePos = getMousePos(canvas, event);
 			update(requestFire());
 		}, false);
+		window.ondevicemotion = function(event) {
+			if (agx >= Math.round(event.accelerationIncludingGravity.x)+4){
+				shake = true;
+			}
+			if (agx <= Math.round(event.accelerationIncludingGravity.x)-4){
+				if (shake == true){
+					update(requestPickup());
+					shake = false;
+				}
+			}
+		}
 }
 
-export function startGame(){	
+export function startGame(){
 	interval=null;
 	interval=setInterval(function(){ 
 		stage.animateDraw(); 
+		touchMove();
 	},20);
 }
 export function pauseGame(){
 	clearInterval(interval);
-	console.log("pause");
 	interval=null;
 }
 
@@ -206,6 +288,7 @@ function showErrors(ui,response){
 	authenticate user
 */
 export function gui_login(){
+	
 	(function ($) {
 		var user = $("#ui_login [id=user]").val();
 		var password = $("#ui_login [id=password]").val();
@@ -213,9 +296,11 @@ export function gui_login(){
 		var f = function(data, success){
 			var s = success && data.success;
 			if(s){
+				// validate user?
 				gui_state.isLoggedIn=true;
 				gui_state.user=user;
 				gui_state.password=password;
+				/*setupFunction();*/
 				// Instantiate User:
 				canvas=document.getElementById('stage');
 				setupGame();
@@ -238,11 +323,19 @@ function checkboxSelected(value){
 
 const getProfileFromFormFunc = function getProfileFromForm(formId, $){
 	var data = null;
+	var checked = "";
+	if($("input[value=beginner]").prop( "checked") === true){
+		checked = "beginner";
+	}else if($("input[value=advanced]").prop( "checked") === true){
+		checked = "advanced";
+	}else if($("input[value=intermediate]").prop( "checked") === true){
+		checked = "intermediate";
+	}
 	data = {
 		user : $(formId+" [id=user]").val(),
 		password : $(formId+" [id=password]").val(),
 		confirmpassword : $(formId+" [id=confirmpassword]").val(),
-		skill : $(formId+" [id=changeSkill]").attr("title"),
+		skill : checked,
 		year: $(formId+" [data-name=year]").val(),
 		month: $(formId+" [data-name=month]").val(),
 		day: $(formId+" [data-name=day]").val(),
@@ -250,17 +343,13 @@ const getProfileFromFormFunc = function getProfileFromForm(formId, $){
 		playafternoon: checkboxSelected($(formId+" [data-name=playafternoon]:checked").val()),
 		playevening: checkboxSelected($(formId+" [data-name=playevening]:checked").val())
 	};
-	$("input[value='"+data.skill+"']").prop('checked',true);
 	return data;
 }
 
 export function gui_register(){
 	(function ($) {
-
 		clearErrors("#ui_register");
-		var formId = "#ui_register";
 		var data = getProfileFromFormFunc("#ui_register", $);
-		var p = $(formId+" [id=changeSkill]").attr("title");
 		var f = function(response, success){
 			if(success){
 			} else {
@@ -274,9 +363,10 @@ export function gui_register(){
 }
 
 export function gui_profile(){
-	(function ($) {
-		var formId = "#ui_profile";
 
+
+
+	(function ($) {
 		clearErrors("#ui_profile");
 		var data = getProfileFromFormFunc("#ui_profile", $);
 		var f = function(response, success){
@@ -294,37 +384,36 @@ export function gui_profile(){
 
 const myFunction = function putDataIntoProfileForm(data){
 	(function ($) {
-		$(document).ready(function(){
 
 		var formId="#ui_profile";
 		$(formId+" [id=user]").html(data.user);
+		$(formId+" [id=user]").val(data.user);
 		$(formId+" [id=password]").val(data.password);
 		$(formId+" [id=confirmpassword]").val(data.password);
-		$("input[value='"+data.skill+"']").prop('checked',true);
+		$("input[value="+data.skill+"]").prop( "checked", true );
 		$(formId+" [data-name=year]").val(data.year);
 		$(formId+" [data-name=month]").val(data.month);
 		$(formId+" [data-name=day]").val(data.day);
-		$(formId+" [data-name=playmorning]").attr('checked', data.playmorning==1);
-		$(formId+" [data-name=playafternoon]").attr('checked', data.playafternoon==1);
-		$(formId+" [data-name=playevening]").attr('checked', data.playevening==1);
+		$(formId+" [data-name=playmorning]").attr('checked', data.playmorning===1);
+		$(formId+" [data-name=playafternoon]").attr('checked', data.playafternoon===1);
+		$(formId+" [data-name=playevening]").attr('checked', data.playevening===1);
 
-	  });
+	 
 	})(jQuery);
 }
-	
-
 export function gui_profile_load(){
-	var credentials = { user: gui_state.user, password: gui_state.password };
-	var f = function(response, success){
-		if(success){
-			// response.data has fields to load into our form
-			myFunction(response.data);
-		} else {
-			showErrors("#ui_profile",response);
+	(function ($) {
+		var f = function(response, success){
+			if(success){
+				// response.data has fields to load into our form
+				myFunction(response.data);
+			} else {
+				showErrors("#ui_profile",response);
+			}
 		}
-	}
-	var credentials = { user: gui_state.user, password: gui_state.password };
-	api_profile_load(f, credentials);
-}
+		var credentials = { user: gui_state.user, password: gui_state.password };
+		api_profile_load(f, credentials);
+	})(jQuery);
 
+}
 

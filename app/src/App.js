@@ -1,8 +1,6 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React  from 'react';
 import './App.css';
-import {startGame, pauseGame, gui_login, gui_register, gui_profile, gui_profile_load, setupGame} from './controller.js';
-import ViewButton from './components/button.js';
+import {startGame, pauseGame, gui_login, gui_register, gui_profile, gui_profile_load, handleStart, handleMove, handleEnd} from './controller.js';
 import GameView from './components/game.js';
 import InstructionView from './components/instruction.js';
 import LoginView from './components/login.js';
@@ -31,8 +29,9 @@ class App extends React.Component {
     this.instructionButtonClickHandler = this.instructionButtonClickHandler.bind(this);
     this.updateButtonClickHandler = this.updateButtonClickHandler.bind(this);
     this.playButtonClickHandler = this.playButtonClickHandler.bind(this);
+    this.controlButtonClickHandler = this.controlButtonClickHandler.bind(this);
 
-    this.game = <GameView />;
+    this.game = <GameView controlClickHandler={this.controlButtonClickHandler}/>;
 
   }
   loginButtonClickHandler(e){
@@ -83,6 +82,51 @@ class App extends React.Component {
   playButtonClickHandler(e){
     this.setState({pageLogIn: false, pageRegister: false, pageGame: true, pageProfile: false, pageInstruction: false, pageStats: false});
     startGame();
+
+
+  }
+  controlButtonClickHandler(e){
+
+
+    var up=document.getElementById('keyboard_key_up');
+    var left=document.getElementById('keyboard_key_left');
+    var down=document.getElementById('keyboard_key_down');
+    var right=document.getElementById('keyboard_key_right');
+    var canvas=document.getElementById('stage');
+    var pick=document.getElementById('pickup');
+
+    if(e.target.id ==="keyboard_key_up"){
+
+      up.addEventListener("touchstart", handleStart, false);
+      up.addEventListener("touchmove", handleMove, false);
+      up.addEventListener("touchend", handleEnd, false);
+
+    }else if(e.target.id ==="keyboard_key_down"){
+
+      down.addEventListener("touchstart", handleStart, false);
+      down.addEventListener("touchmove", handleMove, false);
+      down.addEventListener("touchend", handleEnd, false);
+    
+    }else if(e.target.id ==="keyboard_key_right"){
+
+      right.addEventListener("touchstart", handleStart, false);
+      right.addEventListener("touchmove", handleMove, false);
+      right.addEventListener("touchend", handleEnd, false);
+    
+    }else if(e.target.id ==="keyboard_key_left"){
+
+      left.addEventListener("touchstart", handleStart, false);
+      left.addEventListener("touchmove", handleMove, false);
+      left.addEventListener("touchend", handleEnd, false);
+      
+    }else if(e.target.id ==="pickup"){
+      canvas.addEventListener("touchstart", handleStart, false);
+      
+    }if(e.target.id ==="stage"){
+      pick.addEventListener("touchstart", handleStart, false);
+    }
+
+
 
 
   }
