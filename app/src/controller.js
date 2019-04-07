@@ -50,7 +50,7 @@ const soc = function getSocket() {
 			else if (msg.isZombie == true && stage){
 				if (msg.id == stage.player.id && msg.type == "player"){
 					alert("Game Over");
-					update({type: "close", id: stage.player.id});
+					removePlayer();
 					return ;
 				}
 				stage.getActorbyId(msg.id).makeZombie();
@@ -89,6 +89,11 @@ const soc = function getSocket() {
 
 function send(data){
 	soc.server.send(JSON.stringify(data));
+}
+
+function removePlayer(){
+	stage.player.colour = "#6f6";
+	update({type: "close", id: stage.player.id});
 }
 
 //Get Mouse Position
@@ -185,6 +190,7 @@ function touchMove(){
 export function setupGame(){
 	canvas=document.getElementById('stage');
 	soc.server = false;
+	stage = null;
 	soc();	
 	changeState(false, gui_state.isLoggedIn);
 }
@@ -217,6 +223,7 @@ function requestPickup(){
 }
 
 function activateListeners(){
+	if (stage){
 		document.addEventListener('keydown', function(event){
 			var key = event.key;
 			var moveMap = { 
@@ -234,7 +241,8 @@ function activateListeners(){
 		//report the mouse position on click
 		canvas.addEventListener("mousemove", function (event) {
 					var mousePos = getMousePos(canvas, event);
-			stage.mouseMove(mousePos.x, mousePos.y);
+					stage.mouseMove(mousePos.x, mousePos.y);
+			
 		}, false);
 		canvas.addEventListener("click", function (event) {
 					var mousePos = getMousePos(canvas, event);
@@ -251,6 +259,7 @@ function activateListeners(){
 				}
 			}
 		}
+	}
 }
 
 export function startGame(){
@@ -261,11 +270,10 @@ export function startGame(){
 	},20);
 }
 export function endGame(){
+	changeState(false, false);
 	clearInterval(interval);
 	interval=null;
-	update({type: "close", id: stage.player.id});
-	stage = null;
-	changeState(false, false);
+	removePlayer();
 }
 
 function clearErrors(ui){
