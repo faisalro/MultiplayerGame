@@ -65,6 +65,11 @@ input:focus {
 }
 
 
+#wrapper {
+  display: flex;
+  justify-content: center;
+
+}
 @media screen and (max-width: 1200px) {
   canvas {
     width: 100%; /* The width is 100%, when the viewport is 800px or smaller */

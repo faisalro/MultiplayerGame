@@ -1,6 +1,7 @@
 import jQuery from 'jquery';
 import Stage from './render';
 import {api_login, api_register, api_profile, api_profile_load} from './rest.js';
+import {changeState} from './index.js'
 window.jQuery = jQuery;
 var stage;
 var interval=null;
@@ -13,8 +14,10 @@ var gui_state = {
 	isLoggedIn : false,
 	user     : "",
 	password : "",
+	registered : false,
 
 };
+//export gui_state;
 var shake = false;
 var agx =0;
 
@@ -60,7 +63,6 @@ const soc = function getSocket() {
 						activateListeners();
 					} 
 				}
-				
 				else if(msg.msg == "move" && stage.player.id == msg.id) {
 					stage.player.updatePos(msg.x, msg.y);
 				}
@@ -80,9 +82,7 @@ const soc = function getSocket() {
 				} else {
 					stage.updateBullet(msg.x, msg.y , msg.id);
 				}
-				
 			}
-			
 		}
   });
 }
@@ -90,7 +90,6 @@ const soc = function getSocket() {
 function send(data){
 	soc.server.send(JSON.stringify(data));
 }
-/*  */
 
 //Get Mouse Position
 function getMousePos(canvas, evt) {
@@ -102,9 +101,9 @@ function getMousePos(canvas, evt) {
 }
 
 export function handleStart(evt) {
+	evt.preventDefault();
 	var path = evt.target;
 	var button_name = path.id;
-
 	if(button_name ==="keyboard_key_up"){
 	  up = true;
 
@@ -124,8 +123,10 @@ export function handleStart(evt) {
 	}
 	touchMove();
 	if(button_name ==="stage"){
-		getMousePos(canvas, evt.touches[0]);
-		update(requestFire());	  
+		
+		var mousePos = getMousePos(canvas, evt.touches[0]);
+		stage.mouseMove(mousePos.x, mousePos.y);
+		update(requestFire());
 	}
 }
 export function handleMove(evt) {
@@ -185,7 +186,9 @@ export function setupGame(){
 	canvas=document.getElementById('stage');
 	soc.server = false;
 	soc();	
+	changeState(false, gui_state.isLoggedIn);
 }
+
 
 function update(msg){
 	send(msg);
@@ -214,7 +217,6 @@ function requestPickup(){
 }
 
 function activateListeners(){
-		// https://javascript.info/keyboard-events
 		document.addEventListener('keydown', function(event){
 			var key = event.key;
 			var moveMap = { 
@@ -263,9 +265,8 @@ export function endGame(){
 	interval=null;
 	update({type: "close", id: stage.player.id});
 	stage = null;
-
+	changeState(false, false);
 }
-
 
 function clearErrors(ui){
 	(function ($) {
@@ -317,10 +318,10 @@ export function gui_login(){
 				gui_state.password="";
 				showErrors("#ui_login",data);
 			}
+			gui_state.verified = true;
 		}
 		api_login(user, password, f);
 	})(jQuery);
-	
 }
 
 function checkboxSelected(value){
@@ -359,6 +360,8 @@ export function gui_register(){
 		var data = getProfileFromFormFunc("#ui_register", $);
 		var f = function(response, success){
 			if(success){
+				gui_state.registered=true;
+				changeState(true, false);
 			} else {
 				showErrors("#ui_register",response);
 			}
@@ -370,9 +373,6 @@ export function gui_register(){
 }
 
 export function gui_profile(){
-
-
-
 	(function ($) {
 		clearErrors("#ui_profile");
 		var data = getProfileFromFormFunc("#ui_profile", $);

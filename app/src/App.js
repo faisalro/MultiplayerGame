@@ -1,6 +1,6 @@
 import React  from 'react';
 import './App.css';
-import {startGame, endGame, gui_login, gui_register, gui_profile, gui_profile_load, handleStart, handleMove, handleEnd} from './controller.js';
+import {startGame, endGame, gui_state, gui_login, gui_register, gui_profile, gui_profile_load, handleStart, handleMove, handleEnd} from './controller.js';
 import GameView from './components/game.js';
 import InstructionView from './components/instruction.js';
 import LoginView from './components/login.js';
@@ -18,7 +18,9 @@ class App extends React.Component {
       pageLogIn: true,
       pageRegister: false,
       pageGame: false,
-      pageProfile: false, pageInstruction: false, pageStats: false
+      pageProfile: false, pageInstruction: false, pageStats: false,
+      verifyLogin: false,
+      verifyRegister: false
 
     };
     this.loginButtonClickHandler = this.loginButtonClickHandler.bind(this);
@@ -29,28 +31,26 @@ class App extends React.Component {
     this.instructionButtonClickHandler = this.instructionButtonClickHandler.bind(this);
     this.updateButtonClickHandler = this.updateButtonClickHandler.bind(this);
     this.playButtonClickHandler = this.playButtonClickHandler.bind(this);
-    this.controlButtonClickHandler = this.controlButtonClickHandler.bind(this);
+    //this.controlButtonClickHandler = this.controlButtonClickHandler.bind(this);
 
-    this.game = <GameView controlClickHandler={this.controlButtonClickHandler}/>;
+    //this.game = <GameView controlClickHandler={this.controlButtonClickHandler}/>;
+    if(this.props.log == true){
+      this.setState({loggedIn: true, pageLogIn: false, pageRegister: false, pageGame: true, pageProfile: false, pageInstruction: false, pageStats: false});
+    }
 
   }
   loginButtonClickHandler(e){
     gui_login();
-    this.setState({loggedIn: true, pageLogIn: false, pageRegister: false, pageGame: true, pageProfile: false, pageInstruction: false, pageStats: false});
-
   }
   registerButtonClickHandler(e){
     if(this.state.pageLogIn){
       this.setState({pageLogIn: false, pageRegister: true, pageGame: false, pageProfile: false, pageInstruction: false, pageStats: false});
 
     }else if(this.state.pageRegister){
-      this.setState({pageLogIn: true, pageRegister: false, pageGame: false, pageProfile: false, pageInstruction: false, pageStats: false});
       gui_register();
-      
     }
-    
-
   }
+
   updateButtonClickHandler(e){
     gui_profile();
     this.setState({pageLogIn: false, pageRegister: false, pageGame: true, pageProfile: false, pageInstruction: false, pageStats: false});
@@ -58,9 +58,8 @@ class App extends React.Component {
 
   }
   logoutButtonClickHandler(e){
-    this.setState({loggedIn: false, pageLogIn: true, pageRegister: false, pageGame: false, pageProfile: false, pageInstruction: false, pageStats: false});
+    this.setState({loggedIn: false, pageLogIn: true, pageRegister: false, pageGame: false, pageProfile: false, pageInstruction: false, pageStats: false, verifyLogin: false});
     endGame();
-
   }
 
   profileButtonClickHandler(e){
@@ -81,58 +80,28 @@ class App extends React.Component {
 
 
   }
-  controlButtonClickHandler(e){
-
-
-    var up=document.getElementById('keyboard_key_up');
-    var left=document.getElementById('keyboard_key_left');
-    var down=document.getElementById('keyboard_key_down');
-    var right=document.getElementById('keyboard_key_right');
-    var canvas=document.getElementById('stage');
-    var pick=document.getElementById('pickup');
-
-    if(e.target.id ==="keyboard_key_up"){
-
-      up.addEventListener("touchstart", handleStart, false);
-      up.addEventListener("touchmove", handleMove, false);
-      up.addEventListener("touchend", handleEnd, false);
-
-    }else if(e.target.id ==="keyboard_key_down"){
-
-      down.addEventListener("touchstart", handleStart, false);
-      down.addEventListener("touchmove", handleMove, false);
-      down.addEventListener("touchend", handleEnd, false);
-    
-    }else if(e.target.id ==="keyboard_key_right"){
-
-      right.addEventListener("touchstart", handleStart, false);
-      right.addEventListener("touchmove", handleMove, false);
-      right.addEventListener("touchend", handleEnd, false);
-    
-    }else if(e.target.id ==="keyboard_key_left"){
-
-      left.addEventListener("touchstart", handleStart, false);
-      left.addEventListener("touchmove", handleMove, false);
-      left.addEventListener("touchend", handleEnd, false);
-      
-    }else if(e.target.id ==="pickup"){
-      canvas.addEventListener("touchstart", handleStart, false);
-      
-    }if(e.target.id ==="stage"){
-      pick.addEventListener("touchstart", handleStart, false);
-    }
-
-
-
-
-  }
-
 
   render(){
     let nav = null;
     let view;
-      
-
+    if(this.state.verifyLogin == false){
+      if(this.props.loggedin == true){
+        this.state.loggedIn = true;
+        this.state.pageGame = true;
+        this.state.pageLogIn = false;
+        this.state.verifyLogin= true;
+      }
+    }
+    if(this.state.verifyRegister == false){
+      if(this.props.registered == true){
+        this.state.loggedIn = false;
+        this.state.pageGame = false;
+        this.state.pageLogIn = true;
+        this.state.pageRegister = false;
+        this.state.verifyRegister = true;
+      }
+    }
+    
     let style = {};
     if (!this.state.pageGame){
       style = {display: 'none'};
@@ -172,10 +141,8 @@ class App extends React.Component {
             
           </div>
           <div id="game" style={style}>
-            {this.game}
+            {this.props.game}
           </div>
-          
-          
         </div>
       );
       
