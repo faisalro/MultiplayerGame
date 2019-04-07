@@ -8,7 +8,6 @@ class Stage {
 		this.bullets = [];
 
 		this.canvasWidth=canvas.width;
-		console.log(this.canvasWidth);
 		this.canvasHeight=canvas.height;
 		this.width = width;
 		this.height = height;

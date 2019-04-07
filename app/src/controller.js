@@ -22,7 +22,6 @@ var agx =0;
 const soc = function getSocket() {
 
   if (getSocket.server && getSocket.server.readyState < 2) {
-		console.log("yes");
     return Promise.resolve(getSocket.server);
   }
 
@@ -43,7 +42,6 @@ const soc = function getSocket() {
 			var msg = JSON.parse(event.data);
 			
 			if (stage==null && msg.width  && msg.height){
-				console.log("msg: "+event.data);
 				stage=new Stage(canvas, msg.width, msg.height);
 			}
 			else if (msg.isZombie == true && stage){
@@ -58,8 +56,6 @@ const soc = function getSocket() {
 				if (msg.msg == "init"){
 					if (stage.player == null){
 						stage.initPlayer(msg);
-						console.log("data: "+event.data);
-						console.log("player: "+stage.player.id);
 						startGame();
 						activateListeners();
 					} 
@@ -70,7 +66,6 @@ const soc = function getSocket() {
 				}
 				else if (msg.msg == "other" && msg.id != stage.player.id){
 					stage.initOpponent(msg);
-					console.log("here");
 				} 
 				else{
 					stage.updateOpponents(msg.x, msg.y, msg.id);
