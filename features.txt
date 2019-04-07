@@ -4,3 +4,9 @@ Feature 1:
 Feature 2:
     In order to pick up ammo one must come near a crate and tilt the device (landscape orientation)
     so that its flat and then bring it back up enough to pick up ammo.
+
+Please Note:
+    Due to issues deploying on the 142.1.200.14x server (unable to install node_modules as posted on myBB).
+    Our group was forced to test the mobile features on our laptops (which happened to be touch screen
+    and had accelerometer) and simulate the screen ratio. The app was tested on chrome and simulated iPad
+    screen ratio (1024x768) landscape mode.

@@ -65,19 +65,21 @@ input:focus {
 }
 
 
-
 #wrapper {
   display: flex;
   justify-content: center;
+
 }
-.center{
-  margin: 10px 30% auto;
+@media screen and (max-width: 1200px) {
+  canvas {
+    width: 100%; /* The width is 100%, when the viewport is 800px or smaller */
+    height: 100%;
+  }
 }
 
-#controls {
-  display: inline-grid;
-  grid-column-gap: 0;
-  align-self: end;
+
+.center{
+  margin: 10px 30% auto;
 }
 
 .movements_control {
@@ -244,4 +246,19 @@ input[type="number"]{
 }
 #pickup{
   background-color: #FE6B8B;
+  bottom: 130px;
+  left: 70%;
+  position: absolute;
+  opacity: .5; 
+}
+
+
+#controls {
+  display: inline-grid;
+  grid-column-gap: 0;
+  align-self: end;
+  bottom: 100px;
+  left: 25%;
+  position: absolute;
+  opacity: .5; 
 }

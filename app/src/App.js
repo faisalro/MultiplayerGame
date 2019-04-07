@@ -1,6 +1,6 @@
 import React  from 'react';
 import './App.css';
-import {startGame, pauseGame, gui_login, gui_register, gui_profile, gui_profile_load, handleStart, handleMove, handleEnd} from './controller.js';
+import {startGame, pauseGame, endGame, gui_state, gui_login, gui_register, gui_profile, gui_profile_load, handleStart, handleMove, handleEnd} from './controller.js';
 import GameView from './components/game.js';
 import InstructionView from './components/instruction.js';
 import LoginView from './components/login.js';
@@ -18,7 +18,9 @@ class App extends React.Component {
       pageLogIn: true,
       pageRegister: false,
       pageGame: false,
-      pageProfile: false, pageInstruction: false, pageStats: false
+      pageProfile: false, pageInstruction: false, pageStats: false,
+      verifyLogin: false,
+      verifyRegister: false
 
     };
     this.loginButtonClickHandler = this.loginButtonClickHandler.bind(this);
@@ -29,14 +31,23 @@ class App extends React.Component {
     this.instructionButtonClickHandler = this.instructionButtonClickHandler.bind(this);
     this.updateButtonClickHandler = this.updateButtonClickHandler.bind(this);
     this.playButtonClickHandler = this.playButtonClickHandler.bind(this);
-    this.controlButtonClickHandler = this.controlButtonClickHandler.bind(this);
+    //this.controlButtonClickHandler = this.controlButtonClickHandler.bind(this);
 
-    this.game = <GameView controlClickHandler={this.controlButtonClickHandler}/>;
+    //this.game = <GameView controlClickHandler={this.controlButtonClickHandler}/>;
+    if(this.props.log == true){
+      console.log("construct")
+      this.setState({loggedIn: true, pageLogIn: false, pageRegister: false, pageGame: true, pageProfile: false, pageInstruction: false, pageStats: false});
+
+    }
 
   }
   loginButtonClickHandler(e){
     gui_login();
-    this.setState({loggedIn: true, pageLogIn: false, pageRegister: false, pageGame: true, pageProfile: false, pageInstruction: false, pageStats: false});
+    /*if (login){
+      this.setState({loggedIn: true, pageLogIn: false, pageRegister: false, pageGame: true, pageProfile: false, pageInstruction: false, pageStats: false});
+
+
+    }*/
 
   }
   registerButtonClickHandler(e){
@@ -44,7 +55,7 @@ class App extends React.Component {
       this.setState({pageLogIn: false, pageRegister: true, pageGame: false, pageProfile: false, pageInstruction: false, pageStats: false});
 
     }else if(this.state.pageRegister){
-      this.setState({pageLogIn: true, pageRegister: false, pageGame: false, pageProfile: false, pageInstruction: false, pageStats: false});
+      //this.setState({pageLogIn: true, pageRegister: false, pageGame: false, pageProfile: false, pageInstruction: false, pageStats: false});
       gui_register();
       
     }
@@ -58,8 +69,9 @@ class App extends React.Component {
 
   }
   logoutButtonClickHandler(e){
-    this.setState({loggedIn: false, pageLogIn: true, pageRegister: false, pageGame: false, pageProfile: false, pageInstruction: false, pageStats: false});
-    pauseGame();
+    this.setState({loggedIn: false, pageLogIn: true, pageRegister: false, pageGame: false, pageProfile: false, pageInstruction: false, pageStats: false, verifyLogin: false});
+    //pauseGame();
+    endGame();
 
   }
 
@@ -85,7 +97,7 @@ class App extends React.Component {
 
 
   }
-  controlButtonClickHandler(e){
+/*  controlButtonClickHandler(e){
 
 
     var up=document.getElementById('keyboard_key_up');
@@ -129,12 +141,30 @@ class App extends React.Component {
 
 
 
-  }
+  }*/
 
 
   render(){
     let nav = null;
     let view;
+    if(this.state.verifyLogin == false){
+      if(this.props.loggedin == true){
+        this.state.loggedIn = true;
+        this.state.pageGame = true;
+        this.state.pageLogIn = false;
+        this.state.verifyLogin= true;
+      }
+    }
+    if(this.state.verifyRegister == false){
+      if(this.props.registered == true){
+        this.state.loggedIn = false;
+        this.state.pageGame = false;
+        this.state.pageLogIn = true;
+        this.state.pageRegister = false;
+        this.state.verifyRegister = true;
+      }
+    }
+    
       
 
     let style = {};
@@ -176,7 +206,7 @@ class App extends React.Component {
             
           </div>
           <div id="game" style={style}>
-            {this.game}
+            {this.props.game}
           </div>
           
           

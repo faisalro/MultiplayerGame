@@ -1,6 +1,7 @@
 import jQuery from 'jquery';
 import Stage from './render';
 import {api_login, api_register, api_profile, api_profile_load} from './rest.js';
+import {changeState} from './index.js'
 window.jQuery = jQuery;
 var stage;
 var interval=null;
@@ -13,8 +14,10 @@ var gui_state = {
 	isLoggedIn : false,
 	user     : "",
 	password : "",
+	registered : false,
 
 };
+//export gui_state;
 var shake = false;
 var agx =0;
 
@@ -101,11 +104,9 @@ function getMousePos(canvas, evt) {
 }
 
 export function handleStart(evt) {
-	//evt.preventDefault();
-	//console.log(evt);
-	//var path = evt.path;
-	var button_name = evt.srcElement.id;
-
+	evt.preventDefault();
+	var path = evt.target;
+	var button_name = path.id;
 	if(button_name ==="keyboard_key_up"){
 	  up = true;
 
@@ -125,17 +126,15 @@ export function handleStart(evt) {
 	}
 	touchMove();
 	if(button_name ==="stage"){
+		
 		var mousePos = getMousePos(canvas, evt.touches[0]);
-		//stage.mouseMove(mousePos.x, mousePos.y);
+		stage.mouseMove(mousePos.x, mousePos.y);
 		update(requestFire());
-
-	  
 	}
 }
 export function handleMove(evt) {
-	//evt.preventDefault();
 	var path = evt.path;
-	var button_name = path[0].id
+	var button_name = path[0].id;
 
 	if(button_name ==="keyboard_key_up"){
 	  up = true;
@@ -171,10 +170,8 @@ export function handleEnd(evt) {
 	}
 }
 function touchMove(){
-	//console.log("touchmove");
 	if(up){
 	  update(requestMove(0, -1));
-
 	}
 	else if(down){
 	  update(requestMove(0, 1));
@@ -184,15 +181,16 @@ function touchMove(){
 	  
 	}else if(left){
 	  update(requestMove(-1, 0));
-	  
 	}
-
 }
 
 export function setupGame(){
+	console.log("sett");
 	canvas=document.getElementById('stage');
 	soc();	
+	changeState(false, gui_state.isLoggedIn);
 }
+
 
 function update(msg){
 	send(msg);
@@ -245,6 +243,17 @@ function activateListeners(){
 					var mousePos = getMousePos(canvas, event);
 			update(requestFire());
 		}, false);
+		window.ondevicemotion = function(event) {
+			if (agx >= Math.round(event.accelerationIncludingGravity.x)+4){
+				shake = true;
+			}
+			if (agx <= Math.round(event.accelerationIncludingGravity.x)-4){
+				if (shake == true){
+					update(requestPickup());
+					shake = false;
+				}
+			}
+		}
 }
 
 export function startGame(){
@@ -257,14 +266,20 @@ export function startGame(){
 export function pauseGame(){
 	clearInterval(interval);
 	interval=null;
+	changeState(false, false);
 }
+export function endGame(){
+	clearInterval(interval);
+	interval=null;
+	changeState(false, false);
+	update({type: "close"});
+}
+
 
 function clearErrors(ui){
 	(function ($) {
 		$(document).ready(function(){
-
 		$(ui+" .form-errors").html("");
-
 	  });
 	})(jQuery);
 }
@@ -311,10 +326,10 @@ export function gui_login(){
 				gui_state.password="";
 				showErrors("#ui_login",data);
 			}
+			gui_state.verified = true;
 		}
 		api_login(user, password, f);
 	})(jQuery);
-	
 }
 
 function checkboxSelected(value){
@@ -353,6 +368,8 @@ export function gui_register(){
 		var data = getProfileFromFormFunc("#ui_register", $);
 		var f = function(response, success){
 			if(success){
+				gui_state.registered=true;
+				changeState(true, false);
 			} else {
 				showErrors("#ui_register",response);
 			}
