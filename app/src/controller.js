@@ -19,9 +19,10 @@ var shake = false;
 var agx =0;
 
 
-const soc =function getSocket() {
+const soc = function getSocket() {
 
   if (getSocket.server && getSocket.server.readyState < 2) {
+		console.log("yes");
     return Promise.resolve(getSocket.server);
   }
 
@@ -40,21 +41,25 @@ const soc =function getSocket() {
 		};
 		getSocket.server.onmessage = function (event) {
 			var msg = JSON.parse(event.data);
-			if (stage==null){
+			
+			if (stage==null && msg.width  && msg.height){
+				console.log("msg: "+event.data);
 				stage=new Stage(canvas, msg.width, msg.height);
 			}
-			if (msg.isZombie == true){
+			else if (msg.isZombie == true && stage){
 				if (msg.id == stage.player.id && msg.type == "player"){
 					alert("Game Over");
-					update({type: "close"});
+					update({type: "close", id: stage.player.id});
 					return ;
 				}
 				stage.getActorbyId(msg.id).makeZombie();
 			}
-			if (msg.type == "player"){
+			else if (msg.type == "player" && stage){
 				if (msg.msg == "init"){
 					if (stage.player == null){
 						stage.initPlayer(msg);
+						console.log("data: "+event.data);
+						console.log("player: "+stage.player.id);
 						startGame();
 						activateListeners();
 					} 
@@ -65,15 +70,16 @@ const soc =function getSocket() {
 				}
 				else if (msg.msg == "other" && msg.id != stage.player.id){
 					stage.initOpponent(msg);
+					console.log("here");
 				} 
 				else{
 					stage.updateOpponents(msg.x, msg.y, msg.id);
 				}
 			} 
-			else if (msg.type == "obstacle"){
+			else if (msg.type == "obstacle" && stage){
 				stage.initObstacle(msg);
 			}
-			else if (msg.type == "bullet"){
+			else if (msg.type == "bullet" && stage){
 				if (stage.getBullet(msg.id) == null){
 					stage.initShot(msg);
 				} else {
@@ -146,6 +152,7 @@ export function handleMove(evt) {
 	}
 	touchMove();
 }
+
 export function handleEnd(evt) {
 	evt.preventDefault();
 	var path = evt.path;
@@ -181,6 +188,7 @@ function touchMove(){
 
 export function setupGame(){
 	canvas=document.getElementById('stage');
+	soc.server = false;
 	soc();	
 }
 
@@ -255,10 +263,14 @@ export function startGame(){
 		touchMove();
 	},20);
 }
-export function pauseGame(){
+export function endGame(){
 	clearInterval(interval);
 	interval=null;
+	update({type: "close", id: stage.player.id});
+	stage = null;
+
 }
+
 
 function clearErrors(ui){
 	(function ($) {

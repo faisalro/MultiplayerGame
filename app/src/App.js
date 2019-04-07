@@ -1,6 +1,6 @@
 import React  from 'react';
 import './App.css';
-import {startGame, pauseGame, gui_login, gui_register, gui_profile, gui_profile_load, handleStart, handleMove, handleEnd} from './controller.js';
+import {startGame, endGame, gui_login, gui_register, gui_profile, gui_profile_load, handleStart, handleMove, handleEnd} from './controller.js';
 import GameView from './components/game.js';
 import InstructionView from './components/instruction.js';
 import LoginView from './components/login.js';
@@ -59,25 +59,21 @@ class App extends React.Component {
   }
   logoutButtonClickHandler(e){
     this.setState({loggedIn: false, pageLogIn: true, pageRegister: false, pageGame: false, pageProfile: false, pageInstruction: false, pageStats: false});
-    pauseGame();
+    endGame();
 
   }
 
   profileButtonClickHandler(e){
     this.setState({pageLogIn: false, pageRegister: false, pageGame: false, pageProfile: true, pageInstruction: false, pageStats: false});
-    pauseGame();
     gui_profile_load();
 
   }
   instructionButtonClickHandler(e){
     this.setState({pageLogIn: false, pageRegister: false, pageGame: false, pageProfile: false, pageInstruction: true, pageStats: false});
-    pauseGame();
 
   }
   statsButtonClickHandler(e){
     this.setState({pageLogIn: false, pageRegister: false, pageGame: false, pageProfile: false, pageInstruction: false, pageStats: true});
-    pauseGame();
-
   }
   playButtonClickHandler(e){
     this.setState({pageLogIn: false, pageRegister: false, pageGame: true, pageProfile: false, pageInstruction: false, pageStats: false});

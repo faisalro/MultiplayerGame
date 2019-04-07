@@ -92,6 +92,7 @@ wss.on('connection', function(ws) {
 			ws.close();
 			stage.removeActor(stage.getPlayer(msg.id));
 			stage.removePlayer(msg.id);
+			
 		} else {
 			// any action made by a player
 			if (msg.type == 'player' && stage.getPlayer(msg.id) != null){
