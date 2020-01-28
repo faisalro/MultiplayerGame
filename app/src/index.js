@@ -8,7 +8,6 @@ import * as serviceWorker from './serviceWorker';
 const game = <GameView/>;
 
 export function changeState(registered, loggedin){
-	console.log(registered, loggedin, "index");
 	
 	if((registered == false) && (loggedin == false)){
 		ReactDOM.render(<App registered={registered} loggedin={loggedin} game={<GameView/>}/>, document.getElementById('root'));
